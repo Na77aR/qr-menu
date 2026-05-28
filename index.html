@@ -24,6 +24,10 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
 .rest-title{text-align:center;margin-top:6px;font-size:20px;font-weight:900;color:#1a1208;cursor:pointer;}
 .social-links{display:flex;gap:12px;justify-content:center;margin-top:8px;}
 .social-btn{width:34px;height:34px;border-radius:50%;background:#1a1208;color:var(--gold-light);display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:14px;}
+.search-wrap{padding:0 16px 12px;margin-top:4px;}
+.search-box{display:flex;gap:10px;}
+.search-input,.price-filter{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:12px;color:var(--text);font-family:'Cairo';font-size:14px;}
+.search-input{flex:1;}
 .hero-slider{position:relative;height:180px;overflow:hidden;margin:12px 16px;border-radius:24px;border:1px solid var(--border);}
 .hero-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity .5s;}
 .hero-slide.active{opacity:1;}
@@ -102,6 +106,14 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
   </div>
   <div class="hero-slider" id="hero-slider"></div>
   <div class="rates-banner" id="rates-banner"></div>
+  <div class="search-wrap">
+    <div class="search-box">
+      <input type="text" id="search-input" class="search-input" placeholder="ابحث عن صنف..." oninput="buildMenu()">
+      <select id="price-filter" class="price-filter" onchange="buildMenu()">
+        <option value="all">كل الأسعار</option>
+      </select>
+    </div>
+  </div>
   <div class="cat-bar" id="cat-bar"></div>
   <div id="menu-content"></div>
   <button id="float-cart" onclick="goTo('page-cart')">
@@ -253,7 +265,7 @@ let MENU = JSON.parse(localStorage.getItem('resto_menu')) || [
 let nextId = Math.max(...MENU.flatMap(c=>c.items.map(i=>i.id)),100)+1;
 let cart = JSON.parse(localStorage.getItem('saved_cart')) || {};
 let activeCat = 0, activeCur = 'SYP', currentSlide = 0, slideInterval;
-let nameClickCount = 0; // عداد نقرات اسم المطعم
+let nameClickCount = 0;
 
 // دوال العملات
 function sypTo(amount,cur){ let r=CONFIG.rates; if(cur==='USD') return (amount/r.usd).toFixed(2); if(cur==='TRY') return (amount/r.try_rate).toFixed(1); return amount.toLocaleString(); }
@@ -268,7 +280,20 @@ function getTotal(){ return Object.values(cart).reduce((s,i)=>s+i.totalPrice,0);
 function getTotalItems(){ return Object.values(cart).reduce((s,i)=>s+i.qty,0); }
 function updateFloat(){ let t=getTotalItems(), btn=document.getElementById('float-cart'); btn.style.display=t>0?'flex':'none'; document.getElementById('cart-count').innerText=t; document.getElementById('cart-total-float').innerText=fmt(getTotal()); }
 
-// بناء المنيو
+// بناء المنيو مع البحث والتصفية
+function buildPriceFilterOptions(){
+  let filter = document.getElementById('price-filter');
+  if(!filter) return;
+  let options = [];
+  if(activeCur === 'SYP'){
+    options = [['all','كل الأسعار'],['100','حتى 100 ل.س'],['200','حتى 200 ل.س'],['300','حتى 300 ل.س']];
+  } else if(activeCur === 'USD'){
+    options = [['all','All'],['1','≤$1'],['2','≤$2'],['3','≤$3']];
+  } else {
+    options = [['all','Tüm'],['5','≤5₺'],['10','≤10₺'],['20','≤20₺']];
+  }
+  filter.innerHTML = options.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('');
+}
 function buildSlider(){
   let c=document.getElementById('hero-slider'); if(!c) return; c.innerHTML='';
   if(!CONFIG.slides.length){ c.innerHTML='<div style="background:#2a2520;height:100%;display:flex;align-items:center;justify-content:center;">📸 أضف صوراً للمعرض</div>'; return; }
@@ -279,7 +304,6 @@ function buildSlider(){
 function buildRatesBanner(){ document.getElementById('rates-banner').innerHTML=`<span>💱 أسعار الصرف:</span><span>1$ = <strong>${Number(CONFIG.rates.usd).toLocaleString()} ل.س جديدة</strong></span><span>1₺ = <strong>${Number(CONFIG.rates.try_rate).toLocaleString()} ل.س جديدة</strong></span>`; }
 function buildMenu(){
   document.getElementById('rest-name-display').innerText = CONFIG.name;
-  // إضافة حدث الضغط الخفي (5 مرات) على اسم المطعم
   const nameEl = document.getElementById('rest-name-display');
   nameEl.onclick = (e) => {
     e.stopPropagation();
@@ -297,11 +321,15 @@ function buildMenu(){
   if(CONFIG.instagram && CONFIG.instagram.trim() && CONFIG.instagram!=='#') socialDiv.innerHTML+=`<a class="social-btn" href="${CONFIG.instagram}" target="_blank">IG</a>`;
   if(CONFIG.facebook && CONFIG.facebook.trim() && CONFIG.facebook!=='#') socialDiv.innerHTML+=`<a class="social-btn" href="${CONFIG.facebook}" target="_blank">f</a>`;
   buildRatesBanner(); buildSlider();
+  buildPriceFilterOptions();
   let bar=document.getElementById('cat-bar'), content=document.getElementById('menu-content');
   bar.innerHTML='';
   MENU.forEach((cat,ci)=>{ let btn=document.createElement('button'); btn.className='cat-btn'+(ci===activeCat?' active':''); btn.innerText=cat.cat; btn.onclick=()=>{ activeCat=ci; buildMenu(); }; bar.appendChild(btn); });
+  let searchTerm = (document.getElementById('search-input')?.value || '').toLowerCase();
+  let maxPrice = document.getElementById('price-filter')?.value;
+  let priceLimit = (maxPrice && maxPrice !== 'all') ? parseInt(maxPrice) : Infinity;
   let pageDiv=document.createElement('div'); pageDiv.className='menu-page'; pageDiv.innerHTML=`<div class="section-title">${MENU[activeCat].cat}</div>`;
-  MENU[activeCat].items.forEach(item=>{
+  MENU[activeCat].items.filter(item => item.name.toLowerCase().includes(searchTerm) && (maxPrice === 'all' || item.price <= priceLimit)).forEach(item=>{
     const imgSrc = item.image && item.image.trim() !== '' ? item.image : 'https://via.placeholder.com/400x150?text=No+Image';
     pageDiv.innerHTML+=`<div class="item-card"><img class="item-img" src="${imgSrc}" onerror="this.src='https://via.placeholder.com/400x150?text=No+Image'"><div class="item-info"><div class="item-name"><span>${item.name}</span><span class="item-price">${fmt(item.price)}</span></div><div class="item-desc">${item.desc}</div><div class="item-footer"><button class="btn-order" onclick="openProductModal(${item.id})">🛒 طلب</button>${!item.available?'<span class="unavailable-badge">غير متوفر</span>':''}</div></div></div>`;
   });
@@ -591,12 +619,12 @@ function openEditItem(id){
   document.getElementById('modal-price').value = item.price;
   document.getElementById('modal-image-url').value = item.image || '';
   document.getElementById('modal-image-file').value = '';
+  const previewDiv = document.getElementById('image-preview');
   if(item.image && item.image.trim() !== ''){
-    let preview = document.getElementById('image-preview');
-    preview.style.display = 'block';
-    preview.querySelector('img').src = item.image;
+    previewDiv.style.display = 'block';
+    previewDiv.querySelector('img').src = item.image;
   } else {
-    document.getElementById('image-preview').style.display = 'none';
+    previewDiv.style.display = 'none';
   }
   loadVariationsAndAddonsForEdit(item);
   let sel = document.getElementById('modal-cat');
