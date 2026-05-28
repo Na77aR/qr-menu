@@ -2,1699 +2,673 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>مطعم الجسري</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>مطعم الجسري - نظام طلب متكامل</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
 :root{--gold:#c8963e;--gold-light:#e8b86d;--bg:#0f0e0d;--bg2:#1a1814;--bg3:#1e1c18;--border:#2e2b24;--text:#f5f0e8;--muted:#a09080;--dim:#7a7060;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direction:rtl;}
-.app{max-width:480px;margin:0 auto;min-height:100vh;}
-.page{display:none;min-height:100vh;padding-bottom:40px;}
+.app{max-width:480px;margin:0 auto;min-height:100vh;position:relative;}
+.page{display:none;min-height:100vh;padding-bottom:70px;}
 .page.active{display:block;}
-.header{background:linear-gradient(135deg,#c8963e,#e8b86d,#c8963e);padding:18px 20px 12px;text-align:center;position:sticky;top:0;z-index:50;box-shadow:0 4px 20px rgba(200,150,62,0.4);}
-.header h1{font-size:22px;font-weight:900;color:#1a1208;}
-.header-sub{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:4px;}
-.header-sub p{font-size:12px;color:#3d2a08;}
-/* عملة سويتش */
-.cur-switch{display:flex;gap:3px;background:rgba(0,0,0,0.15);border-radius:999px;padding:3px;}
-.cur-btn{padding:3px 10px;border-radius:999px;border:none;cursor:pointer;font-size:11px;font-weight:800;font-family:'Cairo',sans-serif;background:transparent;color:#3d2a08;transition:all 0.2s;}
-.cur-btn.active{background:#1a1208;color:var(--gold-light);}
-.page-header{background:linear-gradient(135deg,#c8963e,#e8b86d);padding:18px 20px;text-align:center;}
-.page-header h2{font-size:21px;font-weight:900;color:#1a1208;}
-.page-header p{font-size:13px;color:#3d2a08;margin-top:3px;}
-.cat-bar{display:flex;gap:8px;padding:12px 16px;overflow-x:auto;background:var(--bg2);border-bottom:1px solid var(--border);scrollbar-width:none;}
-.cat-bar::-webkit-scrollbar{display:none;}
-.cat-btn{white-space:nowrap;padding:8px 16px;border-radius:999px;border:none;cursor:pointer;font-size:13px;font-family:'Cairo',sans-serif;font-weight:700;background:#2a2520;color:var(--muted);transition:all 0.2s;}
-.cat-btn.active{background:var(--gold);color:#1a1208;}
-.menu-page{padding:16px 16px 100px;}
-.section-title{font-size:17px;font-weight:700;color:var(--gold-light);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
-.item-card{background:var(--bg3);border-radius:16px;margin-bottom:12px;overflow:hidden;border:1px solid var(--border);display:flex;align-items:center;transition:border-color 0.2s;}
-.item-card.in-cart{border-color:var(--gold);}
-.item-emoji{font-size:34px;padding:16px 10px;background:#161411;min-width:64px;text-align:center;}
-.item-body{flex:1;padding:12px 14px;}
-.item-name{font-size:15px;font-weight:700;margin-bottom:3px;}
-.item-desc{font-size:12px;color:var(--dim);margin-bottom:8px;}
-.item-footer{display:flex;justify-content:space-between;align-items:center;}
-.item-price{font-size:13px;font-weight:800;color:var(--gold);line-height:1.5;}
-.item-price small{display:block;font-size:10px;color:var(--dim);font-weight:600;}
-.item-controls{display:flex;align-items:center;gap:8px;}
-.qty-btn{width:30px;height:30px;border-radius:50%;border:none;cursor:pointer;font-size:18px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'Cairo',sans-serif;}
-.qty-btn.plus{background:var(--gold);color:#1a1208;}
-.qty-btn.minus{background:#2a2520;color:var(--text);}
-.qty-num{min-width:24px;text-align:center;font-weight:800;font-size:16px;}
-#float-cart{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#c8963e,#e8b86d);color:#1a1208;border:none;border-radius:999px;padding:14px 28px;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 8px 30px rgba(200,150,62,0.5);display:none;align-items:center;gap:10px;font-family:'Cairo',sans-serif;z-index:100;max-width:340px;width:90%;justify-content:space-between;}
-.cart-badge{background:#1a1208;color:var(--gold-light);border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;}
-.form-wrap{padding:0 16px;}
-.form-label{color:var(--muted);font-size:14px;margin-bottom:8px;display:block;margin-top:16px;}
-.form-input{width:100%;background:var(--bg3);border:1px solid #3a3530;border-radius:12px;padding:12px 16px;font-size:15px;color:var(--text);font-family:'Cairo',sans-serif;direction:rtl;outline:none;}
-.form-input:focus{border-color:var(--gold);}
-textarea.form-input{min-height:80px;resize:none;}
-select.form-input{appearance:none;}
-.back-btn{background:none;border:none;color:var(--gold);font-size:15px;cursor:pointer;padding:14px 20px;font-family:'Cairo',sans-serif;font-weight:700;display:flex;align-items:center;gap:6px;}
-.btn-primary{width:100%;background:linear-gradient(135deg,#c8963e,#e8b86d);border:none;border-radius:14px;padding:15px;font-size:16px;font-weight:800;color:#1a1208;cursor:pointer;font-family:'Cairo',sans-serif;margin-top:8px;}
-.btn-secondary{width:100%;background:var(--bg3);border:2px solid #3a3530;border-radius:14px;padding:13px;font-size:14px;font-weight:700;color:var(--text);cursor:pointer;font-family:'Cairo',sans-serif;margin-top:8px;}
-.btn-danger{background:#7a1a1a;border:none;border-radius:8px;padding:6px 12px;font-size:12px;color:#ffaaaa;cursor:pointer;font-family:'Cairo',sans-serif;}
-.btn-sm{background:#1a3a2a;border:none;border-radius:8px;padding:6px 12px;font-size:12px;color:#aaffaa;cursor:pointer;font-family:'Cairo',sans-serif;}
-.info-box{background:var(--bg3);border-radius:14px;padding:16px;margin:16px 0;border:1px solid var(--border);}
-.info-box .row{display:flex;justify-content:space-between;padding:5px 0;font-size:14px;color:var(--muted);}
-.info-box .total{display:flex;justify-content:space-between;padding-top:12px;border-top:1px solid var(--border);font-size:18px;font-weight:800;color:var(--gold-light);margin-top:8px;}
-.cart-item{display:flex;align-items:center;background:var(--bg3);border-radius:12px;margin-bottom:8px;overflow:hidden;border:1px solid var(--border);}
-.cart-item-emoji{font-size:26px;padding:12px 10px;background:#161411;min-width:54px;text-align:center;}
-.cart-item-body{flex:1;padding:10px 12px;}
-/* باقات الدفع */
-.pay-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
-.pay-tab{flex:1;min-width:80px;padding:10px 6px;border:none;border-radius:10px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;font-size:12px;transition:all 0.2s;background:#2a2520;color:var(--muted);}
-.pay-tab.active{background:var(--gold);color:#1a1208;}
-.pay-panel{display:none;}
-.pay-panel.active{display:block;}
-.steps-box{background:#1a1814;border-radius:14px;padding:16px;margin-bottom:16px;border:1px solid rgba(200,150,62,0.3);font-size:13px;line-height:2.2;color:var(--muted);}
-.steps-box .title{color:var(--gold);font-weight:700;margin-bottom:4px;}
-.verify-result{border-radius:12px;padding:14px;margin-bottom:12px;font-size:14px;text-align:center;display:none;}
-.verify-result.ok{background:#0d2a1a;border:1px solid #2a7a4a;color:#4ade80;}
-.verify-result.fail{background:#2a0d0d;border:1px solid #7a2a2a;color:#f87171;}
-/* نجاح */
-.success-page{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px;text-align:center;}
-.success-icon{font-size:80px;margin-bottom:24px;animation:pop 0.4s ease;}
-@keyframes pop{0%{transform:scale(0)}80%{transform:scale(1.1)}100%{transform:scale(1)}}
-/* أدمن */
-.admin-login{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px;text-align:center;}
-.admin-section{background:var(--bg3);border-radius:16px;margin:12px 16px;border:1px solid var(--border);overflow:hidden;}
-.admin-section-title{background:#2a2520;padding:13px 16px;font-weight:700;color:var(--gold-light);font-size:14px;display:flex;justify-content:space-between;align-items:center;}
-.admin-field{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
-.admin-field label{color:var(--muted);font-size:13px;min-width:85px;}
-.admin-field input{flex:1;background:#161411;border:1px solid #3a3530;border-radius:8px;padding:8px 12px;font-size:14px;color:var(--text);font-family:'Cairo',sans-serif;direction:rtl;outline:none;}
-.admin-field input:focus{border-color:var(--gold);}
-.admin-item{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
-.admin-item-info{flex:1;}
-.admin-item-name{font-size:14px;font-weight:700;margin-bottom:2px;}
-.admin-item-price{font-size:12px;color:var(--gold);}
-.admin-cat-header{background:#1a1814;padding:9px 16px;font-size:13px;color:var(--gold);font-weight:700;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
-/* بطاقة أسعار الصرف */
-.rate-card{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);}
-.rate-flag{font-size:28px;min-width:40px;text-align:center;}
-.rate-info{flex:1;}
-.rate-name{font-size:14px;font-weight:700;margin-bottom:4px;}
-.rate-input-wrap{display:flex;align-items:center;gap:8px;}
-.rate-input{background:#161411;border:1px solid #3a3530;border-radius:8px;padding:8px 12px;font-size:15px;font-weight:700;color:var(--gold-light);font-family:'Cairo',sans-serif;width:130px;direction:ltr;text-align:center;outline:none;}
-.rate-input:focus{border-color:var(--gold);}
-.rate-unit{color:var(--muted);font-size:12px;}
-/* عرض أسعار الصرف للعميل */
-.rates-banner{background:#1a1814;border-bottom:1px solid var(--border);padding:8px 16px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap;}
-.rates-banner span{font-size:11px;color:var(--muted);}
-.rates-banner strong{color:var(--gold-light);}
-/* modal */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
-.modal-overlay.active{display:flex;}
-.modal{background:var(--bg2);border-radius:20px;padding:22px;width:100%;max-width:400px;border:1px solid var(--border);}
-.modal h3{font-size:18px;font-weight:800;color:var(--gold-light);margin-bottom:14px;}
-.modal-btns{display:flex;gap:8px;margin-top:14px;}
-.modal-btns button{flex:1;}
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--gold);color:#1a1208;padding:12px 24px;border-radius:999px;font-weight:700;font-size:14px;z-index:300;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;}
-
-/* ===== NEW UI ===== */
+.header{background:linear-gradient(135deg,#c8963e,#e8b86d,#c8963e);padding:12px 16px 10px;position:sticky;top:0;z-index:50;border-radius:0 0 24px 24px;}
 .top-header-row{display:flex;justify-content:space-between;align-items:center;gap:10px;}
-.logo-box{width:56px;height:56px;border-radius:16px;background:rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;font-size:28px;color:#1a1208;font-weight:900;overflow:hidden;}
+.logo-box{width:56px;height:56px;background:rgba(0,0,0,0.1);border-radius:20px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
 .logo-box img{width:100%;height:100%;object-fit:cover;}
-.lang-switch{background:rgba(0,0,0,0.15);padding:8px 12px;border-radius:999px;font-size:12px;font-weight:800;color:#1a1208;cursor:pointer;}
-.social-links{display:flex;gap:8px;justify-content:center;margin-top:10px;}
-.social-btn{width:34px;height:34px;border-radius:50%;background:#1a1208;color:var(--gold-light);display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:15px;font-weight:800;}
-.hero-slider{position:relative;height:190px;overflow:hidden;margin:14px 16px;border-radius:20px;border:1px solid var(--border);}
-.hero-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity .6s;}
+.lang-switch{background:rgba(0,0,0,0.2);padding:6px 14px;border-radius:40px;font-size:12px;font-weight:800;color:#1a1208;cursor:pointer;}
+.cur-switch{display:flex;gap:3px;background:rgba(0,0,0,0.15);border-radius:999px;padding:3px;}
+.cur-btn{padding:4px 12px;border-radius:999px;border:none;cursor:pointer;font-size:11px;font-weight:800;background:transparent;color:#3d2a08;}
+.cur-btn.active{background:#1a1208;color:var(--gold-light);}
+.rest-title{text-align:center;margin-top:6px;font-size:20px;font-weight:900;color:#1a1208;cursor:pointer;}
+.social-links{display:flex;gap:12px;justify-content:center;margin-top:8px;}
+.social-btn{width:34px;height:34px;border-radius:50%;background:#1a1208;color:var(--gold-light);display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:14px;}
+.hero-slider{position:relative;height:180px;overflow:hidden;margin:12px 16px;border-radius:24px;border:1px solid var(--border);}
+.hero-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity .5s;}
 .hero-slide.active{opacity:1;}
-.hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.7),rgba(0,0,0,.2));}
-.hero-caption{position:absolute;bottom:18px;right:18px;font-size:22px;font-weight:900;}
-.search-wrap{padding:0 16px 12px;}
-.search-box{display:flex;gap:10px;}
-.search-input,.price-filter{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:12px;color:var(--text);font-family:'Cairo',sans-serif;}
-.search-input{flex:1;}
-.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:480px;width:100%;background:#161411;border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:10px 0;z-index:120;}
-.nav-btn{background:none;border:none;color:var(--muted);font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.6),rgba(0,0,0,.1));}
+.rates-banner{background:#1a1814;border-bottom:1px solid var(--border);padding:8px 16px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap;font-size:12px;}
+.cat-bar{display:flex;gap:8px;padding:10px 16px;overflow-x:auto;background:var(--bg2);scrollbar-width:none;}
+.cat-bar::-webkit-scrollbar{display:none;}
+.cat-btn{white-space:nowrap;padding:6px 18px;border-radius:40px;border:none;cursor:pointer;font-size:13px;font-weight:700;background:#2a2520;color:var(--muted);}
+.cat-btn.active{background:var(--gold);color:#1a1208;}
+.menu-page{padding:12px 16px 100px;}
+.section-title{font-size:18px;font-weight:800;color:var(--gold-light);margin-bottom:12px;border-right:4px solid var(--gold);padding-right:10px;}
+.item-card{background:var(--bg3);border-radius:20px;margin-bottom:12px;border:1px solid var(--border);overflow:hidden;}
+.item-img{width:100%;height:140px;object-fit:cover;background:#161411;display:block;}
+.item-info{padding:12px;}
+.item-name{font-size:16px;font-weight:800;display:flex;justify-content:space-between;align-items:center;}
+.item-price{color:var(--gold);font-weight:800;font-size:14px;}
+.item-desc{font-size:12px;color:var(--dim);margin:6px 0;}
+.item-footer{display:flex;justify-content:space-between;align-items:center;margin-top:8px;}
+.btn-order{background:var(--gold);border:none;border-radius:30px;padding:8px 16px;font-weight:800;cursor:pointer;width:100%;}
+.unavailable-badge{background:#7a2a2a;color:#ffbaba;font-size:10px;padding:2px 8px;border-radius:20px;display:inline-block;margin-right:8px;}
+.cart-badge{background:#1a1208;color:var(--gold);border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;}
+#float-cart{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#c8963e,#e8b86d);border:none;border-radius:60px;padding:12px 24px;display:none;align-items:center;gap:12px;z-index:100;width:90%;max-width:300px;justify-content:space-between;font-weight:800;cursor:pointer;}
+.form-wrap{padding:0 16px;}
+.form-label{color:var(--muted);font-size:13px;margin:16px 0 6px;display:block;}
+.form-input{width:100%;background:var(--bg3);border:1px solid #3a3530;border-radius:14px;padding:12px;color:var(--text);font-family:'Cairo';outline:none;}
+.form-input:focus{border-color:var(--gold);}
+.btn-primary{width:100%;background:linear-gradient(135deg,#c8963e,#e8b86d);border:none;border-radius:16px;padding:14px;font-weight:800;color:#1a1208;cursor:pointer;margin-top:12px;}
+.btn-secondary{width:100%;background:var(--bg3);border:2px solid #3a3530;border-radius:16px;padding:12px;font-weight:700;color:var(--text);cursor:pointer;}
+.back-btn{background:none;border:none;color:var(--gold);font-size:14px;cursor:pointer;padding:14px 20px;display:inline-flex;align-items:center;gap:6px;}
+.info-box{background:var(--bg3);border-radius:20px;padding:16px;margin:16px 0;border:1px solid var(--border);}
+.info-box .row{display:flex;justify-content:space-between;padding:4px 0;font-size:14px;color:var(--muted);}
+.info-box .total{border-top:1px solid var(--border);padding-top:12px;margin-top:8px;font-size:18px;font-weight:800;color:var(--gold-light);}
+.cart-item{background:var(--bg3);border-radius:16px;margin-bottom:8px;display:flex;align-items:center;border:1px solid var(--border);padding:8px;}
+.cart-item-img{width:50px;height:50px;border-radius:12px;object-fit:cover;margin-left:10px;}
+.admin-section{background:var(--bg3);border-radius:20px;margin:12px 16px;border:1px solid var(--border);overflow:hidden;}
+.admin-section-title{background:#2a2520;padding:12px 16px;font-weight:800;color:var(--gold-light);display:flex;justify-content:space-between;}
+.admin-field{padding:10px 16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--border);}
+.admin-field label{min-width:90px;font-size:13px;color:var(--muted);}
+.admin-field input, .admin-field select{flex:1;background:#161411;border:1px solid #3a3530;border-radius:10px;padding:8px 12px;color:white;font-family:'Cairo';}
+.admin-item{display:flex;gap:8px;padding:8px;border-bottom:1px solid var(--border);align-items:center;}
+.admin-item-img{width:40px;height:40px;border-radius:8px;object-fit:cover;}
+.btn-sm{background:#1a3a2a;border:none;border-radius:30px;padding:6px 12px;font-size:11px;color:#aaffaa;cursor:pointer;}
+.btn-danger{background:#7a1a1a;border:none;border-radius:8px;padding:6px 12px;color:#ffaaaa;cursor:pointer;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.active{display:flex;}
+.modal{background:var(--bg2);border-radius:28px;padding:22px;width:100%;max-width:400px;border:1px solid var(--gold);max-height:80vh;overflow-y:auto;}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--gold);color:#1a1208;padding:10px 20px;border-radius:40px;font-weight:700;font-size:13px;z-index:300;opacity:0;transition:0.2s;pointer-events:none;}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:480px;width:100%;background:#161411e6;backdrop-filter:blur(10px);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:8px 0;z-index:120;}
+.nav-btn{background:none;border:none;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;}
 .nav-btn.active{color:var(--gold-light);}
-
+.gallery-preview{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;}
+.gallery-img-card{position:relative;width:80px;height:80px;border-radius:12px;overflow:hidden;border:1px solid var(--gold);}
+.gallery-img-card img{width:100%;height:100%;object-fit:cover;}
+.remove-img{position:absolute;top:2px;right:2px;background:black;color:red;border-radius:20px;width:20px;height:20px;font-size:12px;cursor:pointer;text-align:center;line-height:20px;}
+.variation-option{margin:12px 0;padding:8px;background:#2a2520;border-radius:12px;}
+.addon-item{display:flex;align-items:center;gap:8px;margin:8px 0;}
 </style>
 </head>
 <body>
 <div class="app">
 
-<!-- ===== منيو ===== -->
+<!-- الصفحة الرئيسية -->
 <div id="page-menu" class="page active">
   <div class="header">
     <div class="top-header-row">
       <div class="lang-switch" onclick="toggleLanguage()">AR | EN</div>
-      <div class="logo-box" id="logo-box">🍽️</div>
+      <div class="logo-box" id="logo-box"></div>
       <div class="cur-switch" id="cur-switch">
-        <button class="cur-btn active" onclick="setCurrency('SYP',this)">ل.س</button>
+        <button class="cur-btn active" onclick="setCurrency('SYP',this)">ل.س جديدة</button>
         <button class="cur-btn" onclick="setCurrency('USD',this)">$</button>
         <button class="cur-btn" onclick="setCurrency('TRY',this)">₺</button>
       </div>
     </div>
-
-    <h1 id="rest-name-display" style="margin-top:10px">مطعم الجسري</h1>
-
-    <div class="social-links">
-      <a id="insta-link" class="social-btn" href="#" target="_blank">IG</a>
-      <a id="facebook-link" class="social-btn" href="#" target="_blank">f</a>
-    </div>
-
-    <div class="header-sub">
-      <p>اطلب من قائمتنا مباشرة</p>
-    </div>
+    <div class="rest-title" id="rest-name-display">مطعم الجسري</div>
+    <div class="social-links" id="social-links-container"></div>
   </div>
-
   <div class="hero-slider" id="hero-slider"></div>
-
   <div class="rates-banner" id="rates-banner"></div>
-
-  <div class="search-wrap">
-    <div class="search-box">
-      <input type="text" id="search-input" class="search-input" placeholder="ابحث عن صنف..." oninput="buildMenu()">
-      <select id="price-filter" class="price-filter" onchange="buildMenu()">
-        <option value="all">كل الأسعار</option>
-        <option value="300">حتى 250</option>
-        <option value="800">حتى 800</option>
-        <option value="1200">حتى 1200</option>
-      </select>
-    </div>
-  </div>
-
   <div class="cat-bar" id="cat-bar"></div>
   <div id="menu-content"></div>
   <button id="float-cart" onclick="goTo('page-cart')">
     <div class="cart-badge" id="cart-count">0</div>
-    <span>عرض السلة</span>
+    <span id="float-cart-text">عرض السلة</span>
     <span id="cart-total-float">0</span>
   </button>
 </div>
 
-<!-- ===== سلة ===== -->
+<!-- سلة الطلبات -->
 <div id="page-cart" class="page">
-  <div class="page-header"><h2>🛒 سلة الطلبات</h2><p id="cart-cur-label">بالليرة السورية</p></div>
-  <button class="back-btn" onclick="goTo('page-menu')">← إضافة المزيد</button>
+  <div style="background:linear-gradient(135deg,#c8963e,#e8b86d);padding:18px;"><h2 style="color:#1a1208;">🛒 سلة الطلبات</h2><p id="cart-cur-label"></p></div>
+  <button class="back-btn" onclick="goTo('page-menu')"><span id="back-add">← إضافة المزيد</span></button>
   <div class="form-wrap">
-    <label class="form-label">🪑 رقم الطاولة</label>
-    <input class="form-input" id="table-number" placeholder="أدخل رقم طاولتك" type="number">
-    <label class="form-label">طلباتك</label>
-    <div id="cart-items-list"></div>
-    <label class="form-label">📝 ملاحظات (اختياري)</label>
-    <textarea class="form-input" id="order-note" placeholder="مثال: بدون بصل..."></textarea>
+    <label class="form-label" id="lbl-name">👤 الاسم</label><input class="form-input" id="customer-name">
+    <label class="form-label" id="lbl-address">📍 العنوان</label><input class="form-input" id="customer-address">
+    <label class="form-label" id="lbl-table">🪑 رقم الطاولة (اختياري)</label><input class="form-input" id="table-number">
+    <label class="form-label" id="lbl-delivery-time">⏰ وقت التوصيل (اختياري)</label><input class="form-input" id="delivery-time" type="datetime-local">
+    <label class="form-label" id="lbl-items">طلباتك</label><div id="cart-items-list"></div>
+    <label class="form-label" id="lbl-notes">📝 ملاحظات (اختياري)</label><textarea class="form-input" id="order-note"></textarea>
     <div class="info-box">
-      <div class="row"><span>عدد الأصناف</span><span id="cart-kinds">0</span></div>
-      <div class="row" id="syp-row" style="display:none"><span>بالليرة السورية</span><span id="cart-syp">0</span></div>
-      <div class="total"><span>المجموع</span><span id="cart-total-page">0</span></div>
+      <div class="row"><span id="items-count-label">عدد الأصناف</span><span id="cart-kinds">0</span></div>
+      <div class="row"><span id="subtotal-label">المجموع الفرعي</span><span id="cart-subtotal">0</span></div>
+      <div class="row"><span id="delivery-label">سعر التوصيل</span><span id="cart-delivery">0</span></div>
+      <div class="total"><span id="total-label">المجموع النهائي</span><span id="cart-total-page">0</span></div>
+      <div class="row" id="syp-row" style="display:none"><span id="syp-label">بالليرة السورية الجديدة</span><span id="cart-syp">0</span></div>
     </div>
-    <button class="btn-primary" onclick="goTo('page-payment')">💳 إتمام الطلب ←</button><button class="btn-secondary" onclick="clearCart()">🗑️ مسح السلة</button>
+    <button class="btn-primary" id="send-wa-btn" onclick="sendWhatsApp()">📱 إرسال الطلب عبر واتساب</button>
+    <button class="btn-secondary" id="clear-cart-btn" onclick="clearCart()">🗑️ مسح السلة</button>
   </div>
 </div>
 
-<!-- ===== دفع ===== -->
-<div id="page-payment" class="page">
-  <div class="page-header">
-    <h2>📱 إرسال الطلب</h2>
-    <p>سيتم تحويلك مباشرة إلى واتساب المطعم</p>
-  </div>
-
-  <button class="back-btn" onclick="goTo('page-cart')">← العودة للسلة</button>
-
-  <div class="form-wrap">
-    <div class="info-box">
-      <div style="font-size:14px;line-height:2;color:var(--muted)">
-        ✅ سيتم إرسال الطلب عبر واتساب مباشرة<br>
-        ✅ بيانات الطلب ستبقى محفوظة حتى يتم الإرسال
-      </div>
-    </div>
-
-    <button class="btn-primary" onclick="sendWhatsApp()">📱 إرسال الطلب عبر واتساب</button>
-
-    <!--
-    طرق الدفع معطلة حالياً:
-    - شام كاش
-    - سيريتل كاش
-    - API KEY
-    -->
-  </div>
-</div>
-
-<!-- ===== نجاح ===== -->
-<div id="page-success" class="page">
-  <div class="success-page">
-    <div class="success-icon">✅</div>
-    <div style="font-size:24px;font-weight:900;color:var(--gold-light);margin-bottom:10px;">تم إرسال طلبك!</div>
-    <div style="color:var(--muted);font-size:15px;line-height:1.8;margin-bottom:28px;">وصل طلبك للمطعم 🍽️<br>سيتم تحضيره قريباً</div>
-    <div class="info-box" id="success-summary" style="width:100%;margin-bottom:24px;"></div>
-    <button class="btn-primary" onclick="resetOrder()" style="max-width:300px;width:100%">🔄 طلب جديد</button>
-  </div>
-</div>
-
-<!-- ===== أدمن لوجين ===== -->
+<!-- صفحة تسجيل الدخول للأدمن -->
 <div id="page-admin-login" class="page">
-  <div class="admin-login">
-    <div style="font-size:56px;margin-bottom:14px;">🔐</div>
-    <h2 style="font-size:20px;font-weight:900;color:var(--gold-light);margin-bottom:22px;">لوحة تحكم المطعم</h2>
-    <div style="width:100%;max-width:300px">
-      <input class="form-input" id="admin-pass" type="password" placeholder="كلمة المرور"
-        onkeydown="if(event.key==='Enter')checkAdminPass()">
-      <button class="btn-primary" onclick="checkAdminPass()" style="margin-top:10px">دخول ←</button>
-      <button class="btn-secondary" onclick="goTo('page-menu')">← العودة للمنيو</button>
-      <p id="pass-error" style="color:#f87171;text-align:center;margin-top:10px;font-size:14px;display:none">❌ كلمة المرور خاطئة</p>
-    </div>
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;">
+    <div style="font-size:60px;">🔐</div>
+    <h2 id="admin-login-title">لوحة التحكم</h2>
+    <input class="form-input" id="admin-pass" type="password" placeholder="كلمة المرور" style="max-width:280px;">
+    <button class="btn-primary" onclick="checkAdminPass()" style="max-width:280px;">دخول ←</button>
+    <button class="btn-secondary" onclick="goTo('page-menu')" style="max-width:280px;">العودة للمنيو</button>
+    <p id="pass-error" style="color:#f87171;display:none;">❌ كلمة سر خاطئة</p>
   </div>
 </div>
 
-<!-- ===== لوحة التحكم ===== -->
+<!-- لوحة الأدمن -->
 <div id="page-admin" class="page">
-  <div class="page-header"><h2>⚙️ لوحة التحكم</h2><p>إدارة المطعم والقائمة</p></div>
+  <div style="background:linear-gradient(135deg,#c8963e,#e8b86d);padding:18px;"><h2 style="color:#1a1208;">⚙️ إدارة المطعم</h2></div>
   <button class="back-btn" onclick="goTo('page-menu')">← العودة للمنيو</button>
-
-  <!-- أسعار الصرف -->
-  <div class="admin-section">
-    <div class="admin-section-title">💱 أسعار الصرف اليومية</div>
-    <div class="rate-card">
-      <div class="rate-flag">🇺🇸</div>
-      <div class="rate-info">
-        <div class="rate-name">الدولار الأمريكي</div>
-        <div class="rate-input-wrap">
-          <span style="color:var(--muted);font-size:13px">1 $ =</span>
-          <input class="rate-input" id="rate-usd" type="number" placeholder="13000">
-          <span class="rate-unit">ل.س</span>
-        </div>
-      </div>
-    </div>
-    <div class="rate-card">
-      <div class="rate-flag">🇹🇷</div>
-      <div class="rate-info">
-        <div class="rate-name">الليرة التركية</div>
-        <div class="rate-input-wrap">
-          <span style="color:var(--muted);font-size:13px">1 ₺ =</span>
-          <input class="rate-input" id="rate-try" type="number" placeholder="380">
-          <span class="rate-unit">ل.س</span>
-        </div>
-      </div>
-    </div>
-    <div style="padding:12px 16px">
-      <button class="btn-primary" onclick="saveRates()">💾 حفظ أسعار الصرف</button>
-    </div>
+  <div class="admin-section"><div class="admin-section-title">💱 أسعار الصرف</div>
+    <div class="rate-card" style="padding:12px;"><label>1 دولار = </label><input id="rate-usd" type="number" class="form-input" style="width:130px;"> ل.س جديدة</div>
+    <div class="rate-card" style="padding:12px;"><label>1 ليرة تركية = </label><input id="rate-try" type="number" class="form-input" style="width:130px;"> ل.س جديدة</div>
+    <button class="btn-primary" onclick="saveRates()" style="margin:12px;width:calc(100% - 24px);">💾 حفظ أسعار الصرف</button>
   </div>
-
-  <!-- إعدادات المطعم -->
-  <div class="admin-section">
-    <div class="admin-section-title">🏪 إعدادات المطعم</div>
+  <div class="admin-section"><div class="admin-section-title">🏪 بيانات المطعم</div>
     <div class="admin-field"><label>اسم المطعم</label><input id="cfg-name"></div>
-    <div class="admin-field"><label>واتساب</label><input id="cfg-whatsapp" dir="ltr"></div>
-    <div class="admin-field"><label>شام كاش</label><input id="cfg-shamcash" dir="ltr"></div>
-    <div class="admin-field"><label>سيريتل كاش</label><input id="cfg-syriatel" dir="ltr" placeholder="رقم الهاتف"></div>
-    
-    <div class="admin-field"><label>رابط إنستا</label><input id="cfg-instagram"></div>
-    <div class="admin-field"><label>رابط فيسبوك</label><input id="cfg-facebook"></div>
+    <div class="admin-field"><label>واتساب</label><input id="cfg-whatsapp"></div>
+    <div class="admin-field"><label>إنستا</label><input id="cfg-instagram"></div>
+    <div class="admin-field"><label>فيسبوك</label><input id="cfg-facebook"></div>
     <div class="admin-field"><label>رابط اللوقو</label><input id="cfg-logo"></div>
     <div class="admin-field"><label>رفع لوقو</label><input id="cfg-logo-file" type="file" accept="image/*"></div>
-
-    <div class="admin-field"><label>API Key</label><input id="cfg-apikey" dir="ltr"></div>
-    <div class="admin-field"><label>كلمة المرور</label><input id="cfg-password" type="password" placeholder="اتركها فارغة لعدم التغيير"></div>
-    <div style="padding:12px 16px">
-      <button class="btn-primary" onclick="saveConfig()">💾 حفظ الإعدادات</button>
-    </div>
+    <div class="admin-field"><label>سعر التوصيل</label><input id="cfg-delivery" type="number"></div>
+    <div class="admin-field"><label>كلمة المرور</label><input id="cfg-password" type="password" placeholder="اتركها لعدم التغيير"></div>
+    <button class="btn-primary" onclick="saveConfig()">💾 حفظ الإعدادات</button>
   </div>
-
-  
-  <div class="admin-section">
-    <div class="admin-section-title">🖼️ صور المعرض</div>
-    <div class="admin-field"><label>روابط الصور</label><input id="cfg-slides" placeholder="ضع الروابط وافصل بينهم بفاصلة"></div>
+  <div class="admin-section"><div class="admin-section-title">🖼️ صور المعرض</div>
+    <div style="padding:12px;"><input type="file" id="gallery-files" multiple accept="image/*"><button class="btn-sm" onclick="uploadGalleryImages()">➕ إضافة صور</button><div id="gallery-preview" class="gallery-preview"></div></div>
   </div>
-
-<!-- إدارة القائمة -->
-  <div class="admin-section">
-    <div class="admin-section-title">
-      🍽️ إدارة القائمة
-      <button class="btn-sm" onclick="openAddItem()">+ إضافة صنف</button>
-    </div>
-    <div id="admin-menu-list"></div>
-  </div>
-
-  <!-- إضافة فئة -->
-  <div class="admin-section">
-    <div class="admin-section-title">📂 فئة جديدة</div>
-    <div class="admin-field"><label>اسم الفئة</label><input id="new-cat-name" placeholder="🥗 السلطات"></div>
-    <div style="padding:12px 16px"><button class="btn-primary" onclick="addCategory()">+ إضافة الفئة</button></div>
-  </div>
-  <div style="height:30px"></div>
+  <div class="admin-section"><div class="admin-section-title">🍽️ إدارة القائمة <button class="btn-sm" onclick="openAddItem()">+ إضافة صنف</button></div><div id="admin-menu-list"></div></div>
+  <div class="admin-section"><div class="admin-section-title">📂 إضافة فئة جديدة</div><div class="admin-field"><label>اسم الفئة</label><input id="new-cat-name"></div><button class="btn-primary" onclick="addCategory()">+ إضافة الفئة</button></div>
 </div>
 
-<!-- Modal إضافة/تعديل صنف -->
+<!-- مودال إضافة/تعديل صنف مع صورة -->
 <div class="modal-overlay" id="item-modal">
   <div class="modal">
-    <h3 id="modal-title">إضافة صنف جديد</h3>
-    <input type="hidden" id="modal-item-id">
-    <label class="form-label">الفئة</label>
-    <select class="form-input" id="modal-cat" style="background:var(--bg3)"></select>
-    <label class="form-label">الإيموجي</label>
-    <input class="form-input" id="modal-emoji" placeholder="🍔" maxlength="2" style="font-size:22px;text-align:center">
-    <label class="form-label">اسم الصنف</label>
-    <input class="form-input" id="modal-name" placeholder="شاورما دجاج">
-    <label class="form-label">صورة المنتج</label>
-    <input class="form-input" id="modal-image" placeholder="رابط الصورة">
-    <label class="form-label">رفع صورة المنتج</label>
-    <input class="form-input" id="modal-image-file" type="file" accept="image/*">
-    <label class="form-label">الوصف</label>
-    <input class="form-input" id="modal-desc" placeholder="وصف مختصر">
-    <label class="form-label">السعر بالليرة السورية</label>
-    <input class="form-input" id="modal-price" type="number" placeholder="18000" dir="ltr">
-    <div class="modal-btns">
-      <button class="btn-primary" onclick="saveItem()">💾 حفظ</button>
-      <button class="btn-secondary" onclick="closeModal()">إلغاء</button>
-    </div>
+    <h3 id="modal-title">إضافة صنف</h3><input type="hidden" id="modal-item-id">
+    <label>الفئة</label><select id="modal-cat" class="form-input"></select>
+    <label>صورة المنتج</label>
+    <input type="file" id="modal-image-file" accept="image/*">
+    <label>أو رابط الصورة (اختياري)</label>
+    <input id="modal-image-url" class="form-input" placeholder="https://...">
+    <div id="image-preview" style="width:80px;height:80px;margin-top:5px;border-radius:8px;overflow:hidden;display:none;"><img style="width:100%;height:100%;object-fit:cover;"></div>
+    <label>اسم الصنف</label><input id="modal-name" class="form-input">
+    <label>الوصف</label><input id="modal-desc" class="form-input">
+    <label>السعر (ل.س جديدة)</label><input id="modal-price" type="number" class="form-input">
+    <label style="margin-top:10px;">📏 خيارات الحجم (سعر إضافي)</label><div id="variations-container"></div>
+    <button type="button" class="btn-sm" onclick="addVariationField()">+ إضافة حجم</button>
+    <label style="margin-top:10px;">🧂 إضافات (سعر إضافي)</label><div id="addons-container"></div>
+    <button type="button" class="btn-sm" onclick="addAddonField()">+ إضافة إضافة</button>
+    <div style="display:flex;gap:10px;margin-top:16px;"><button class="btn-primary" onclick="saveItem()">حفظ</button><button class="btn-secondary" onclick="closeModal()">إلغاء</button></div>
   </div>
 </div>
 
-<div class="toast" id="toast">
-<div class="bottom-nav">
-  <button class="nav-btn active" onclick="goTo('page-menu')">🏠<span>الرئيسية</span></button>
-  <button class="nav-btn" onclick="goTo('page-cart')">🛒<span>السلة</span></button>
+<!-- مودال اختيار خيارات المنتج -->
+<div class="modal-overlay" id="product-modal">
+  <div class="modal">
+    <h3 id="product-modal-name"></h3>
+    <img id="product-modal-img" style="width:100%;height:140px;object-fit:cover;border-radius:16px;margin:10px 0;">
+    <div id="product-modal-desc"></div><div id="product-modal-price"></div>
+    <div id="product-variations"></div><div id="product-addons"></div>
+    <label>الكمية</label><input type="number" id="product-qty" value="1" min="1" class="form-input">
+    <div style="display:flex;gap:10px;margin-top:16px;"><button class="btn-primary" onclick="addCustomizedToCart()">إضافة للسلة</button><button class="btn-secondary" onclick="closeProductModal()">إلغاء</button></div>
+  </div>
 </div>
 
-
+<div class="toast" id="toast"></div>
+<div class="bottom-nav">
+  <button class="nav-btn active" onclick="goTo('page-menu')">🏠<span id="nav-home">الرئيسية</span></button>
+  <button class="nav-btn" onclick="goTo('page-cart')">🛒<span id="nav-cart">السلة</span></button>
 </div>
 
 <script>
-// ============================================================
-// إعدادات افتراضية
-// ============================================================
-const DEFAULTS = {
-  name:"مطعم الشام", whatsapp:"963912345678",
-  shamcash:"251axxxxxxxxxxxxxxx", syriatel:"0930000000",
-  apiKey:"YOUR_API_SYRIA_KEY", password:"admin123",
-  rates:{ usd:13000, try_rate:380 },
-  logo:"",
-  instagram:"https://instagram.com",
-  facebook:"https://facebook.com",
-  slides:[
-    "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1200&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1552566626-52f8b828add9?q=80&w=1200&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=1200&auto=format&fit=crop"
-  ]
+// ===================== الترجمات =====================
+const translations = {
+  ar: { home:"الرئيسية", cart:"السلة", addMore:"← إضافة المزيد", name:"👤 الاسم", address:"📍 العنوان", table:"🪑 رقم الطاولة (اختياري)", deliveryTime:"⏰ وقت التوصيل (اختياري)", items:"طلباتك", notes:"📝 ملاحظات (اختياري)", itemsCount:"عدد الأصناف", subtotal:"المجموع الفرعي", deliveryFee:"سعر التوصيل", total:"المجموع النهائي", sypCurr:"بالليرة السورية الجديدة", sendWA:"📱 إرسال الطلب عبر واتساب", clearCart:"🗑️ مسح السلة", viewCart:"عرض السلة", adminLogin:"لوحة التحكم", productNotAvailable:"هذا المنتج غير متوفر حالياً", addedToCart:"تمت إضافة المنتج للسلة", orderSent:"تم إرسال الطلب، سيفتح واتساب", emptyCart:"السلة فارغة", enterNameAddress:"الرجاء إدخال الاسم والعنوان" },
+  en: { home:"Home", cart:"Cart", addMore:"← Add more", name:"👤 Name", address:"📍 Address", table:"🪑 Table number (optional)", deliveryTime:"⏰ Delivery time (optional)", items:"Your items", notes:"📝 Notes (optional)", itemsCount:"Items count", subtotal:"Subtotal", deliveryFee:"Delivery fee", total:"Total", sypCurr:"In new Syrian pound", sendWA:"📱 Send order via WhatsApp", clearCart:"🗑️ Clear cart", viewCart:"View cart", adminLogin:"Admin panel", productNotAvailable:"This product is currently unavailable", addedToCart:"Product added to cart", orderSent:"Order sent, WhatsApp will open", emptyCart:"Cart is empty", enterNameAddress:"Please enter name and address" }
 };
-const DEFAULT_MENU = [
-  {cat:"🥩 المشاوي",items:[
-    {id:1,name:"شاورما دجاج",price:18000,desc:"مع صوص ثوم وخضار",emoji:"🌯"},
-    {id:2,name:"شاورما لحم",price:22000,desc:"مع بهارات خاصة",emoji:"🌯"},
-    {id:3,name:"كباب حلبي",price:25000,desc:"بالبهارات الحلبية",emoji:"🍖"},
-    {id:4,name:"دجاج مشوي",price:30000,desc:"دجاج كامل على الفحم",emoji:"🍗"},
-  ]},
-  {cat:"🥗 المقبلات",items:[
-    {id:5,name:"حمص",price:8000,desc:"مع زيت زيتون",emoji:"🫘"},
-    {id:6,name:"تبولة",price:7000,desc:"بقدونس وبرغل طازج",emoji:"🥗"},
-    {id:7,name:"فتوش",price:7500,desc:"خضار طازجة",emoji:"🥬"},
-  ]},
-  {cat:"🥤 المشروبات",items:[
-    {id:10,name:"عصير ليمون",price:5000,desc:"طازج مع نعنع",emoji:"🍋"},
-    {id:11,name:"كولا",price:4000,desc:"علبة 330ml",emoji:"🥤"},
-    {id:12,name:"ماء معدني",price:2000,desc:"500ml",emoji:"💧"},
-  ]},
-  {cat:"🍰 الحلويات",items:[
-    {id:13,name:"بقلاوة",price:12000,desc:"حلبية أصلية",emoji:"🍯"},
-    {id:14,name:"كنافة",price:15000,desc:"بالجبن الطازج",emoji:"🧁"},
-  ]},
+let currentLang = localStorage.getItem('app_lang') || 'ar';
+function t(key) { return translations[currentLang][key] || key; }
+function toggleLanguage() { currentLang = currentLang === 'ar' ? 'en' : 'ar'; localStorage.setItem('app_lang', currentLang); document.body.dir = currentLang === 'ar' ? 'rtl' : 'ltr'; updateAllTexts(); buildMenu(); if(document.getElementById('page-cart').classList.contains('active')) buildCart(); }
+function updateAllTexts(){
+  document.getElementById('nav-home').innerText = t('home');
+  document.getElementById('nav-cart').innerText = t('cart');
+  if(document.getElementById('back-add')) document.getElementById('back-add').innerText = t('addMore');
+  document.getElementById('lbl-name').innerText = t('name');
+  document.getElementById('lbl-address').innerText = t('address');
+  document.getElementById('lbl-table').innerText = t('table');
+  document.getElementById('lbl-delivery-time').innerText = t('deliveryTime');
+  document.getElementById('lbl-items').innerText = t('items');
+  document.getElementById('lbl-notes').innerText = t('notes');
+  document.getElementById('items-count-label').innerText = t('itemsCount');
+  document.getElementById('subtotal-label').innerText = t('subtotal');
+  document.getElementById('delivery-label').innerText = t('deliveryFee');
+  document.getElementById('total-label').innerText = t('total');
+  document.getElementById('syp-label').innerText = t('sypCurr');
+  document.getElementById('send-wa-btn').innerHTML = t('sendWA');
+  document.getElementById('clear-cart-btn').innerHTML = t('clearCart');
+  document.getElementById('float-cart-text').innerText = t('viewCart');
+  document.getElementById('admin-login-title').innerText = t('adminLogin');
+}
+
+// ===================== الإعدادات الافتراضية =====================
+const DEFAULTS = { name:"مطعم الجسري", whatsapp:"963912345678", instagram:"", facebook:"", logo:"", deliveryFee:5000, password:"admin123", rates:{ usd:130, try_rate:3.8 }, slides:[] };
+let CONFIG = JSON.parse(localStorage.getItem('resto_config')) || JSON.parse(JSON.stringify(DEFAULTS));
+let MENU = JSON.parse(localStorage.getItem('resto_menu')) || [
+  {cat:"🥩 المشاوي", items:[{id:1,name:"شاورما دجاج",price:180,desc:"مع صوص ثوم",image:"",variations:[],addons:[],available:true}]},
+  {cat:"🥗 المقبلات", items:[{id:2,name:"حمص",price:80,desc:"زيت زيتون",image:"",variations:[],addons:[],available:true}]},
+  {cat:"🥤 المشروبات", items:[{id:3,name:"كولا",price:40,desc:"علبة",image:"",variations:[],addons:[],available:true}]}
 ];
+let nextId = Math.max(...MENU.flatMap(c=>c.items.map(i=>i.id)),100)+1;
+let cart = JSON.parse(localStorage.getItem('saved_cart')) || {};
+let activeCat = 0, activeCur = 'SYP', currentSlide = 0, slideInterval;
+let nameClickCount = 0; // عداد نقرات اسم المطعم
 
-let CONFIG = JSON.parse(localStorage.getItem('resto_config')||'null') || {...DEFAULTS};
-let MENU   = JSON.parse(localStorage.getItem('resto_menu')||'null')   || JSON.parse(JSON.stringify(DEFAULT_MENU));
-let nextId = Math.max(...MENU.flatMap(c=>c.items).map(i=>i.id),100)+1;
-let cart={}, activeCat=0, activeCur='SYP', headerTaps=0;
+// دوال العملات
+function sypTo(amount,cur){ let r=CONFIG.rates; if(cur==='USD') return (amount/r.usd).toFixed(2); if(cur==='TRY') return (amount/r.try_rate).toFixed(1); return amount.toLocaleString(); }
+function curSymbol(cur){ return cur==='USD'?'$':cur==='TRY'?'₺':'ل.س جديدة'; }
+function fmt(priceSYP){ return sypTo(priceSYP,activeCur)+' '+curSymbol(activeCur); }
+function fmtSYP(price){ return price.toLocaleString()+' ل.س جديدة'; }
+function setCurrency(cur,el){ activeCur=cur; document.querySelectorAll('.cur-btn').forEach(b=>b.classList.remove('active')); el.classList.add('active'); buildMenu(); if(document.getElementById('page-cart').classList.contains('active')) buildCart(); updateFloat(); }
+function saveData(){ localStorage.setItem('resto_config',JSON.stringify(CONFIG)); localStorage.setItem('resto_menu',JSON.stringify(MENU)); }
+function saveCart(){ localStorage.setItem('saved_cart',JSON.stringify(cart)); }
+function showToast(msg){ let t=document.getElementById('toast'); t.textContent=msg; t.style.opacity=1; setTimeout(()=>t.style.opacity=0,2000); }
+function getTotal(){ return Object.values(cart).reduce((s,i)=>s+i.totalPrice,0); }
+function getTotalItems(){ return Object.values(cart).reduce((s,i)=>s+i.qty,0); }
+function updateFloat(){ let t=getTotalItems(), btn=document.getElementById('float-cart'); btn.style.display=t>0?'flex':'none'; document.getElementById('cart-count').innerText=t; document.getElementById('cart-total-float').innerText=fmt(getTotal()); }
 
-// ============================================================
-// تحويل العملة
-// ============================================================
-function sypTo(amount,cur){
-  const r=CONFIG.rates||DEFAULTS.rates;
-  if(cur==='USD') return (amount/r.usd).toFixed(2);
-  if(cur==='TRY') return (amount/r.try_rate).toFixed(1);
-  return amount.toLocaleString();
-}
-function curSymbol(cur){ return cur==='USD'?'$':cur==='TRY'?'₺':'ل.س'; }
-function curLabel(cur){ return cur==='USD'?'بالدولار الأمريكي':cur==='TRY'?'بالليرة التركية':'بالليرة السورية'; }
-function fmt(syp){ return sypTo(syp,activeCur)+' '+curSymbol(activeCur); }
-function fmtSYP(syp){ return syp.toLocaleString()+' ل.س'; }
-
-function setCurrency(cur,el){
-  activeCur=cur;
-  document.querySelectorAll('.cur-btn').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');
-  
-let currentLang='ar';
-let currentSlide=0;
-
-function toggleLanguage(){
-  currentLang=currentLang==='ar'?'en':'ar';
-  document.body.dir=currentLang==='ar'?'rtl':'ltr';
-  document.getElementById('rest-name-display').textContent=currentLang==='ar'?CONFIG.name:'Restaurant Menu';
-}
-
-
-function buildPriceFilter(){
-  const filter=document.getElementById('price-filter');
-  if(!filter)return;
-
-  let options=[];
-
-  if(activeCur==='SYP'){
-    options=[
-      ['all','كل الأسعار'],
-      ['10000','حتى 10,000 ل.س'],
-      ['20000','حتى 20,000 ل.س'],
-      ['30000','حتى 30,000 ل.س']
-    ];
-  }
-
-  if(activeCur==='USD'){
-    options=[
-      ['all','All Prices'],
-      ['1','Up to $1'],
-      ['2','Up to $2'],
-      ['5','Up to $5']
-    ];
-  }
-
-  if(activeCur==='TRY'){
-    options=[
-      ['all','Tüm Fiyatlar'],
-      ['50','50₺ altı'],
-      ['100','100₺ altı'],
-      ['200','200₺ altı']
-    ];
-  }
-
-  filter.innerHTML=options.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('');
-}
-
-
-function buildSlider(){
-  const slider=document.getElementById('hero-slider');
-  slider.innerHTML='';
-  (CONFIG.slides||[]).forEach((img,i)=>{
-    slider.innerHTML += `
-      <div class="hero-slide ${i===0?'active':''}" style="background-image:url('${img}')">
-        <div class="hero-overlay"></div>
-        <div class="hero-caption">${CONFIG.name}</div>
-      </div>`;
-  });
-
-  setInterval(()=>{
-    const slides=document.querySelectorAll('.hero-slide');
-    if(!slides.length)return;
-    slides.forEach(s=>s.classList.remove('active'));
-    currentSlide=(currentSlide+1)%slides.length;
-    slides[currentSlide].classList.add('active');
-  },4000);
-}
-
-
-function saveCartState(){
-  localStorage.setItem('saved_cart', JSON.stringify(cart));
-}
-
-function loadCartState(){
-  const saved=localStorage.getItem('saved_cart');
-  if(saved){
-    cart=JSON.parse(saved);
-  }
-}
-
-
-function clearCart(){
-  cart={};
-  buildMenu();
-  buildCart();
-  showToast('🗑️ تم مسح السلة');
-}
-
-
-loadCartState();
-buildSlider();
-buildMenu();
-}
-
-function buildRatesBanner(){
-  const r=CONFIG.rates||DEFAULTS.rates;
-  document.getElementById('rates-banner').innerHTML=
-    `<span>💱 أسعار الصرف:</span>
-     <span>1$ = <strong>${Number(r.usd).toLocaleString()} ل.س</strong></span>
-     <span>1₺ = <strong>${Number(r.try_rate).toLocaleString()} ل.س</strong></span>`;
-}
-
-// ============================================================
 // بناء المنيو
-// ============================================================
+function buildSlider(){
+  let c=document.getElementById('hero-slider'); if(!c) return; c.innerHTML='';
+  if(!CONFIG.slides.length){ c.innerHTML='<div style="background:#2a2520;height:100%;display:flex;align-items:center;justify-content:center;">📸 أضف صوراً للمعرض</div>'; return; }
+  CONFIG.slides.forEach((img,i)=>{ let d=document.createElement('div'); d.className='hero-slide'+(i===0?' active':''); d.style.backgroundImage=`url('${img}')`; d.innerHTML='<div class="hero-overlay"></div>'; c.appendChild(d); });
+  if(slideInterval) clearInterval(slideInterval);
+  slideInterval=setInterval(()=>{ let s=document.querySelectorAll('.hero-slide'); if(s.length){ let cur=document.querySelector('.hero-slide.active'); let next=cur?.nextElementSibling||s[0]; cur?.classList.remove('active'); next?.classList.add('active'); } },4000);
+}
+function buildRatesBanner(){ document.getElementById('rates-banner').innerHTML=`<span>💱 أسعار الصرف:</span><span>1$ = <strong>${Number(CONFIG.rates.usd).toLocaleString()} ل.س جديدة</strong></span><span>1₺ = <strong>${Number(CONFIG.rates.try_rate).toLocaleString()} ل.س جديدة</strong></span>`; }
 function buildMenu(){
-  document.getElementById('rest-name-display').textContent=CONFIG.name;
-  document.getElementById('insta-link').href=CONFIG.instagram||'#';
-  document.getElementById('facebook-link').href=CONFIG.facebook||'#';
-  const logoBox=document.getElementById('logo-box');
-  logoBox.innerHTML=CONFIG.logo?`<img src="${CONFIG.logo}">`:'🍽️';
-  buildRatesBanner();
-  buildPriceFilter();
-  const bar=document.getElementById('cat-bar'), content=document.getElementById('menu-content');
-  bar.innerHTML=''; content.innerHTML='';
-  MENU.forEach((cat,ci)=>{
-    const btn=document.createElement('button');
-    btn.className='cat-btn'+(ci===activeCat?' active':'');
-    btn.textContent=cat.cat;
-    btn.onclick=()=>{activeCat=ci;
-let currentLang='ar';
-let currentSlide=0;
-
-function toggleLanguage(){
-  currentLang=currentLang==='ar'?'en':'ar';
-  document.body.dir=currentLang==='ar'?'rtl':'ltr';
-  document.getElementById('rest-name-display').textContent=currentLang==='ar'?CONFIG.name:'Restaurant Menu';
-}
-
-
-function buildPriceFilter(){
-  const filter=document.getElementById('price-filter');
-  if(!filter)return;
-
-  let options=[];
-
-  if(activeCur==='SYP'){
-    options=[
-      ['all','كل الأسعار'],
-      ['10000','حتى 10,000 ل.س'],
-      ['20000','حتى 20,000 ل.س'],
-      ['30000','حتى 30,000 ل.س']
-    ];
-  }
-
-  if(activeCur==='USD'){
-    options=[
-      ['all','All Prices'],
-      ['1','Up to $1'],
-      ['2','Up to $2'],
-      ['5','Up to $5']
-    ];
-  }
-
-  if(activeCur==='TRY'){
-    options=[
-      ['all','Tüm Fiyatlar'],
-      ['50','50₺ altı'],
-      ['100','100₺ altı'],
-      ['200','200₺ altı']
-    ];
-  }
-
-  filter.innerHTML=options.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('');
-}
-
-
-function buildSlider(){
-  const slider=document.getElementById('hero-slider');
-  slider.innerHTML='';
-  (CONFIG.slides||[]).forEach((img,i)=>{
-    slider.innerHTML += `
-      <div class="hero-slide ${i===0?'active':''}" style="background-image:url('${img}')">
-        <div class="hero-overlay"></div>
-        <div class="hero-caption">${CONFIG.name}</div>
-      </div>`;
-  });
-
-  setInterval(()=>{
-    const slides=document.querySelectorAll('.hero-slide');
-    if(!slides.length)return;
-    slides.forEach(s=>s.classList.remove('active'));
-    currentSlide=(currentSlide+1)%slides.length;
-    slides[currentSlide].classList.add('active');
-  },4000);
-}
-
-
-function saveCartState(){
-  localStorage.setItem('saved_cart', JSON.stringify(cart));
-}
-
-function loadCartState(){
-  const saved=localStorage.getItem('saved_cart');
-  if(saved){
-    cart=JSON.parse(saved);
-  }
-}
-
-
-function clearCart(){
-  cart={};
-  buildMenu();
-  buildCart();
-  showToast('🗑️ تم مسح السلة');
-}
-
-
-loadCartState();
-buildSlider();
-buildMenu();};
-    bar.appendChild(btn);
-  });
-  const cat=MENU[activeCat], page=document.createElement('div');
-  page.className='menu-page';
-  page.innerHTML=`<div class="section-title">${cat.cat}</div>`;
-  cat.items
-  .filter(item=>{
-    const q=(document.getElementById('search-input')?.value||'').toLowerCase();
-    const max=document.getElementById('price-filter')?.value||'all';
-    const matches=item.name.toLowerCase().includes(q);
-    const priceOk=max==='all' || item.price<=parseInt(max);
-    return matches && priceOk;
-  })
-  .forEach(item=>{
-    const qty=cart[item.id]||0;
-    const showAlt = activeCur!=='SYP';
-    page.innerHTML+=`
-      <div class="item-card${qty>0?' in-cart':''}" id="card-${item.id}">
-        <div class="item-emoji">${item.emoji}</div>
-        <div class="item-body">
-          <div class="item-name">${item.name}</div>
-          <div class="item-desc">${item.desc}</div>
-          <div class="item-footer">
-            <div class="item-price">
-              ${fmt(item.price)}
-              ${showAlt?`<small>${fmtSYP(item.price)}</small>`:''}
-            </div>
-            <div class="item-controls">
-              ${qty>0?`<button class="qty-btn minus" onclick="changeQty(${item.id},-1)">−</button><span class="qty-num">${qty}</span>`:''}
-              <button class="qty-btn plus" onclick="changeQty(${item.id},1)">+</button>
-            </div>
-          </div>
-        </div>
-      </div>`;
-  });
-  content.appendChild(page);
-  updateFloat();
-  document.getElementById('rest-name-display').onclick=()=>{
-    headerTaps++;
-    if(headerTaps>=5){headerTaps=0;goTo('page-admin-login');}
-    setTimeout(()=>headerTaps=0,3000);
+  document.getElementById('rest-name-display').innerText = CONFIG.name;
+  // إضافة حدث الضغط الخفي (5 مرات) على اسم المطعم
+  const nameEl = document.getElementById('rest-name-display');
+  nameEl.onclick = (e) => {
+    e.stopPropagation();
+    nameClickCount++;
+    if(nameClickCount >= 5){
+      nameClickCount = 0;
+      document.getElementById('admin-pass').value = '';
+      document.getElementById('pass-error').style.display = 'none';
+      goTo('page-admin-login');
+    }
+    setTimeout(() => { nameClickCount = 0; }, 3000);
   };
-}
-
-function changeQty(id,d){ cart[id]=(cart[id]||0)+d; if(cart[id]<=0)delete cart[id]; 
-let currentLang='ar';
-let currentSlide=0;
-
-function toggleLanguage(){
-  currentLang=currentLang==='ar'?'en':'ar';
-  document.body.dir=currentLang==='ar'?'rtl':'ltr';
-  document.getElementById('rest-name-display').textContent=currentLang==='ar'?CONFIG.name:'Restaurant Menu';
-}
-
-
-function buildPriceFilter(){
-  const filter=document.getElementById('price-filter');
-  if(!filter)return;
-
-  let options=[];
-
-  if(activeCur==='SYP'){
-    options=[
-      ['all','كل الأسعار'],
-      ['10000','حتى 10,000 ل.س'],
-      ['20000','حتى 20,000 ل.س'],
-      ['30000','حتى 30,000 ل.س']
-    ];
-  }
-
-  if(activeCur==='USD'){
-    options=[
-      ['all','All Prices'],
-      ['1','Up to $1'],
-      ['2','Up to $2'],
-      ['5','Up to $5']
-    ];
-  }
-
-  if(activeCur==='TRY'){
-    options=[
-      ['all','Tüm Fiyatlar'],
-      ['50','50₺ altı'],
-      ['100','100₺ altı'],
-      ['200','200₺ altı']
-    ];
-  }
-
-  filter.innerHTML=options.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('');
-}
-
-
-function buildSlider(){
-  const slider=document.getElementById('hero-slider');
-  slider.innerHTML='';
-  (CONFIG.slides||[]).forEach((img,i)=>{
-    slider.innerHTML += `
-      <div class="hero-slide ${i===0?'active':''}" style="background-image:url('${img}')">
-        <div class="hero-overlay"></div>
-        <div class="hero-caption">${CONFIG.name}</div>
-      </div>`;
+  let logoBox=document.getElementById('logo-box'); logoBox.innerHTML = CONFIG.logo ? `<img src="${CONFIG.logo}">` : '';
+  let socialDiv=document.getElementById('social-links-container'); socialDiv.innerHTML='';
+  if(CONFIG.instagram && CONFIG.instagram.trim() && CONFIG.instagram!=='#') socialDiv.innerHTML+=`<a class="social-btn" href="${CONFIG.instagram}" target="_blank">IG</a>`;
+  if(CONFIG.facebook && CONFIG.facebook.trim() && CONFIG.facebook!=='#') socialDiv.innerHTML+=`<a class="social-btn" href="${CONFIG.facebook}" target="_blank">f</a>`;
+  buildRatesBanner(); buildSlider();
+  let bar=document.getElementById('cat-bar'), content=document.getElementById('menu-content');
+  bar.innerHTML='';
+  MENU.forEach((cat,ci)=>{ let btn=document.createElement('button'); btn.className='cat-btn'+(ci===activeCat?' active':''); btn.innerText=cat.cat; btn.onclick=()=>{ activeCat=ci; buildMenu(); }; bar.appendChild(btn); });
+  let pageDiv=document.createElement('div'); pageDiv.className='menu-page'; pageDiv.innerHTML=`<div class="section-title">${MENU[activeCat].cat}</div>`;
+  MENU[activeCat].items.forEach(item=>{
+    const imgSrc = item.image && item.image.trim() !== '' ? item.image : 'https://via.placeholder.com/400x150?text=No+Image';
+    pageDiv.innerHTML+=`<div class="item-card"><img class="item-img" src="${imgSrc}" onerror="this.src='https://via.placeholder.com/400x150?text=No+Image'"><div class="item-info"><div class="item-name"><span>${item.name}</span><span class="item-price">${fmt(item.price)}</span></div><div class="item-desc">${item.desc}</div><div class="item-footer"><button class="btn-order" onclick="openProductModal(${item.id})">🛒 طلب</button>${!item.available?'<span class="unavailable-badge">غير متوفر</span>':''}</div></div></div>`;
   });
-
-  setInterval(()=>{
-    const slides=document.querySelectorAll('.hero-slide');
-    if(!slides.length)return;
-    slides.forEach(s=>s.classList.remove('active'));
-    currentSlide=(currentSlide+1)%slides.length;
-    slides[currentSlide].classList.add('active');
-  },4000);
+  content.innerHTML=''; content.appendChild(pageDiv); updateFloat();
 }
 
-
-function saveCartState(){
-  localStorage.setItem('saved_cart', JSON.stringify(cart));
+// خيارات المنتج
+function openProductModal(itemId){
+  let item = MENU.flatMap(c=>c.items).find(i=>i.id==itemId);
+  if(!item.available){ showToast(t('productNotAvailable')); return; }
+  document.getElementById('product-modal-name').innerText = item.name;
+  const imgEl = document.getElementById('product-modal-img');
+  imgEl.src = (item.image && item.image.trim() !== '') ? item.image : 'https://via.placeholder.com/400x150?text=No+Image';
+  imgEl.onerror = () => { imgEl.src = 'https://via.placeholder.com/400x150?text=No+Image'; };
+  document.getElementById('product-modal-desc').innerText = item.desc;
+  document.getElementById('product-modal-price').innerHTML = `<strong>السعر الأساسي:</strong> ${fmt(item.price)}`;
+  let varsDiv = document.getElementById('product-variations'); varsDiv.innerHTML='';
+  (item.variations||[]).forEach((v,idx)=>{ varsDiv.innerHTML+=`<div class="variation-option"><label>${v.name}</label><select id="var_${idx}">${v.options.map(opt=>`<option value="${opt.price}">${opt.name} +${fmt(opt.price)}</option>`).join('')}</select></div>`; });
+  let addonsDiv = document.getElementById('product-addons'); addonsDiv.innerHTML='';
+  (item.addons||[]).forEach((ad,idx)=>{ addonsDiv.innerHTML+=`<div class="addon-item"><input type="checkbox" id="addon_${idx}" value="${ad.price}"> <label>${ad.name} +${fmt(ad.price)}</label></div>`; });
+  document.getElementById('product-qty').value = 1;
+  window.currentProductModal = item;
+  document.getElementById('product-modal').classList.add('active');
 }
-
-function loadCartState(){
-  const saved=localStorage.getItem('saved_cart');
-  if(saved){
-    cart=JSON.parse(saved);
-  }
+function addCustomizedToCart(){
+  let item = window.currentProductModal;
+  let basePrice = item.price;
+  let variationsTotal = 0;
+  for(let i=0;i<(item.variations||[]).length;i++){ let sel = document.getElementById(`var_${i}`); if(sel) variationsTotal += parseInt(sel.value); }
+  let addonsTotal = 0;
+  for(let i=0;i<(item.addons||[]).length;i++){ let chk = document.getElementById(`addon_${i}`); if(chk && chk.checked) addonsTotal += parseInt(chk.value); }
+  let qty = parseInt(document.getElementById('product-qty').value);
+  let totalItemPrice = (basePrice + variationsTotal + addonsTotal) * qty;
+  let cartKey = item.id+'_'+Date.now();
+  cart[cartKey] = { id:item.id, name:item.name, image:item.image, qty:qty, variationsSelected:(item.variations||[]).map((v,i)=>({name:v.name,option:document.getElementById(`var_${i}`)?.options[document.getElementById(`var_${i}`).selectedIndex]?.text})), addonsSelected:(item.addons||[]).filter((a,i)=>document.getElementById(`addon_${i}`)?.checked).map(a=>a.name), totalPrice:totalItemPrice };
+  saveCart(); buildCart(); updateFloat(); closeProductModal(); showToast(t('addedToCart'));
 }
+function closeProductModal(){ document.getElementById('product-modal').classList.remove('active'); }
 
-
-function clearCart(){
-  cart={};
-  buildMenu();
-  buildCart();
-  showToast('🗑️ تم مسح السلة');
-}
-
-
-loadCartState();
-buildSlider();
-buildMenu(); }
-function getTotal(){ return MENU.flatMap(c=>c.items).reduce((s,i)=>s+(cart[i.id]||0)*i.price,0); }
-function getCartItems(){ return MENU.flatMap(c=>c.items).filter(i=>cart[i.id]>0); }
-function getTotalItems(){ return Object.values(cart).reduce((s,q)=>s+q,0); }
-function updateFloat(){
-  const t=getTotalItems(), btn=document.getElementById('float-cart');
-  btn.style.display=t>0?'flex':'none';
-  document.getElementById('cart-count').textContent=t;
-  document.getElementById('cart-total-float').textContent=fmt(getTotal());
-}
-
-// ============================================================
-// السلة
-// ============================================================
+// بناء السلة
 function buildCart(){
-  const items=getCartItems(), list=document.getElementById('cart-items-list');
-  const showAlt=activeCur!=='SYP';
-  document.getElementById('cart-cur-label').textContent=curLabel(activeCur);
-  list.innerHTML='';
-  items.forEach(item=>{
-    const sub=item.price*cart[item.id];
-    list.innerHTML+=`
-      <div class="cart-item">
-        <div class="cart-item-emoji">${item.emoji}</div>
-        <div class="cart-item-body">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-            <span style="font-size:14px;font-weight:700">${item.name}</span>
-            <span style="font-weight:800;color:var(--gold);font-size:13px">${fmt(sub)}</span>
-          </div>
-          ${showAlt?`<div style="text-align:left;font-size:11px;color:var(--dim);margin-bottom:6px">${fmtSYP(sub)}</div>`:''}
-          <div class="item-controls">
-            <button class="qty-btn minus" onclick="changeQty(${item.id},-1);buildCart()">−</button>
-            <span class="qty-num">${cart[item.id]}</span>
-            <button class="qty-btn plus" onclick="changeQty(${item.id},1);buildCart()">+</button>
-            <span style="color:var(--dim);font-size:12px">× ${fmt(item.price)}</span>
-          </div>
-        </div>
-      </div>`;
-  });
-  const total=getTotal();
-  document.getElementById('cart-kinds').textContent=items.length;
-  document.getElementById('cart-total-page').textContent=fmt(total);
-  const sypRow=document.getElementById('syp-row');
-  if(activeCur!=='SYP'){
-    sypRow.style.display='flex';
-    document.getElementById('cart-syp').textContent=fmtSYP(total);
-  } else { sypRow.style.display='none'; }
+  let list=document.getElementById('cart-items-list'); let subtotal=0; list.innerHTML='';
+  Object.values(cart).forEach(citem=>{ subtotal += citem.totalPrice; list.innerHTML+=`<div class="cart-item"><img class="cart-item-img" src="${citem.image || 'https://via.placeholder.com/50'}" onerror="this.src='https://via.placeholder.com/50'"><div style="flex:1;"><div><strong>${citem.name}</strong> x${citem.qty}</div><div style="font-size:11px;">${citem.variationsSelected?.map(v=>v.option).join(', ')} ${citem.addonsSelected?.join(', ')}</div><div>${fmt(citem.totalPrice)}</div></div><button class="btn-danger" onclick="removeCartItem('${Object.keys(cart).find(k=>cart[k]===citem)}')">حذف</button></div>`; });
+  let delivery = CONFIG.deliveryFee || 0; let total = subtotal + delivery;
+  document.getElementById('cart-kinds').innerText = Object.keys(cart).length;
+  document.getElementById('cart-subtotal').innerText = fmt(subtotal);
+  document.getElementById('cart-delivery').innerText = fmt(delivery);
+  document.getElementById('cart-total-page').innerText = fmt(total);
+  if(activeCur!=='SYP'){ document.getElementById('syp-row').style.display='flex'; document.getElementById('cart-syp').innerText = fmtSYP(total); } else document.getElementById('syp-row').style.display='none';
 }
+function removeCartItem(key){ delete cart[key]; saveCart(); buildCart(); updateFloat(); }
+function clearCart(){ cart={}; saveCart(); buildCart(); updateFloat(); showToast('تم مسح السلة'); }
 
-// ============================================================
-// الدفع
-// ============================================================
-function buildPayment(){
-  const t=getTotal();
-  document.getElementById('payment-total-header').textContent='المجموع: '+fmt(t);
-  document.getElementById('sc-amount').textContent=fmtSYP(t);
-  document.getElementById('sc-address').textContent=CONFIG.shamcash;
-  document.getElementById('sy-amount').textContent=fmtSYP(t);
-  document.getElementById('sy-number').textContent=CONFIG.syriatel||'غير محدد';
-}
-function switchPay(type,el){
-  document.querySelectorAll('.pay-tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.pay-panel').forEach(p=>p.classList.remove('active'));
-  document.getElementById('panel-'+type).classList.add('active');
-  el.classList.add('active');
-}
-function buildMsg(extraNote){
-  const items=getCartItems();
-  const table=document.getElementById('table-number').value;
-  const note=document.getElementById('order-note').value;
-  const total=getTotal();
-  let msg=`🍽️ *طلب جديد - ${CONFIG.name}*\n`;
-  if(table) msg+=`🪑 طاولة: *${table}*\n`;
-  msg+=`━━━━━━━━━━━━━\n`;
-  items.forEach(i=>{ msg+=`${i.emoji} ${i.name} × ${cart[i.id]} = *${fmtSYP(i.price*cart[i.id])}*\n`; });
-  msg+=`━━━━━━━━━━━━━\n💰 *المجموع: ${fmtSYP(total)}*`;
-  if(activeCur==='USD') msg+=` ≈ *${sypTo(total,'USD')} $*`;
-  if(activeCur==='TRY') msg+=` ≈ *${sypTo(total,'TRY')} ₺*`;
-  msg+='\n';
-  if(note) msg+=`📝 ${note}\n`;
-  if(extraNote) msg+=extraNote;
-  msg+=`\n🕐 ${new Date().toLocaleTimeString('ar-SY')}`;
-  return msg;
-}
+// واتساب
 function sendWhatsApp(){
-  window.open(`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(buildMsg())}`,'_blank');
-  localStorage.removeItem('saved_cart');
-  cart={};
-
-  
+  if(Object.keys(cart).length===0){ showToast(t('emptyCart')); return; }
+  let name = document.getElementById('customer-name').value.trim();
+  let address = document.getElementById('customer-address').value.trim();
+  if(!name || !address){ showToast(t('enterNameAddress')); return; }
+  let table = document.getElementById('table-number').value;
+  let deliveryTime = document.getElementById('delivery-time').value;
+  let note = document.getElementById('order-note').value;
+  let subtotal = Object.values(cart).reduce((s,i)=>s+i.totalPrice,0);
+  let delivery = CONFIG.deliveryFee;
+  let total = subtotal + delivery;
+  let msg = `🍽️ *طلب جديد من ${name} - ${CONFIG.name}*\n📍 *العنوان:* ${address}\n${table?`🪑 *طاولة:* ${table}\n`:''}${deliveryTime?`⏰ *وقت التوصيل:* ${new Date(deliveryTime).toLocaleString()}\n`:''}━━━━━━━━━━━━━\n`;
+  Object.values(cart).forEach(i=>{ msg+=`• ${i.name} x${i.qty}`; if(i.variationsSelected?.length) msg+=` (${i.variationsSelected.map(v=>v.option).join(', ')})`; if(i.addonsSelected?.length) msg+=` +${i.addonsSelected.join(',+')}`; msg+=` = *${fmtSYP(i.totalPrice)}*\n`; });
+  msg+=`━━━━━━━━━━━━━\n💰 *المجموع الفرعي:* ${fmtSYP(subtotal)}\n🚚 *التوصيل:* ${fmtSYP(delivery)}\n💵 *المجموع:* ${fmtSYP(total)}`;
+  if(activeCur!=='SYP') msg+=` ≈ ${fmt(total)}`;
+  if(note) msg+=`\n📝 ملاحظة: ${note}`;
+  msg+=`\n🕐 ${new Date().toLocaleTimeString('en-GB')}`;
+  window.open(`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(msg)}`,'_blank');
+  cart={}; saveCart(); buildCart(); updateFloat(); goTo('page-menu'); showToast(t('orderSent'));
 }
-async function verifyPayment(type){
-  const inputId=type==='shamcash'?'tran-id-sc':'tran-id-sy';
-  const btnId='verify-btn-'+{shamcash:'sc',syriatel:'sy'}[type];
-  const resId='verify-result-'+{shamcash:'sc',syriatel:'sy'}[type];
-  const tranId=document.getElementById(inputId).value.trim();
-  if(!tranId){showToast('أدخل رقم العملية أولاً');return;}
-  const btn=document.getElementById(btnId), res=document.getElementById(resId);
-  btn.textContent='⏳ جارٍ التحقق...'; btn.disabled=true; res.style.display='none';
-  const resource=type==='shamcash'?'shamcash':'syriatelcash';
-  const address=type==='shamcash'?CONFIG.shamcash:CONFIG.syriatel;
-  try{
-    const r=await fetch(`https://apisyria.com/api/v1?resource=${resource}&action=find_tx&tx=${tranId}&account_address=${address}&api_key=${CONFIG.apiKey}`);
-    const data=await r.json();
-    if(data.success&&data.data.found){
-      const tx=data.data.transaction;
-      if(parseFloat(tx.amount)>=getTotal()){
-        res.className='verify-result ok';
-        res.innerHTML=`✅ تم التحقق! المبلغ: ${parseFloat(tx.amount).toLocaleString()} ل.س<br><small>جارٍ الإرسال...</small>`;
-        res.style.display='block';
-        setTimeout(()=>{
-          const label=type==='shamcash'?'شام كاش':'سيريتل كاش';
-          window.open(`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(buildMsg(`\n✅ *تم الدفع بـ${label}*\nرقم العملية: ${tranId}`))}`,'_blank');
-          
-        },1500);
-      } else {
-        res.className='verify-result fail'; res.innerHTML='❌ المبلغ أقل من المطلوب'; res.style.display='block';
-      }
-    } else { res.className='verify-result fail'; res.innerHTML='❌ العملية غير موجودة'; res.style.display='block'; }
-  } catch(e){ res.className='verify-result fail'; res.innerHTML='❌ خطأ في الاتصال'; res.style.display='block'; }
-  btn.textContent='✅ تحقق وأرسل الطلب'; btn.disabled=false;
-}
-function buildSuccess(){
-  const items=getCartItems(); const total=getTotal();
-  let html='';
-  items.forEach(i=>{ html+=`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #2a2520;color:var(--muted);font-size:14px"><span>${i.emoji} ${i.name} × ${cart[i.id]}</span><span style="color:var(--gold)">${fmt(i.price*cart[i.id])}</span></div>`; });
-  html+=`<div style="display:flex;justify-content:space-between;padding-top:12px;font-size:17px;font-weight:800;color:var(--gold-light)"><span>المجموع</span><span>${fmt(total)}</span></div>`;
-  if(activeCur!=='SYP') html+=`<div style="text-align:center;margin-top:6px;font-size:12px;color:var(--dim)">${fmtSYP(total)}</div>`;
-  document.getElementById('success-summary').innerHTML=html;
+function goTo(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(id === 'page-admin-login'){
+    document.getElementById('admin-pass').value = '';
+    document.getElementById('pass-error').style.display = 'none';
+  }
+  if(id==='page-cart') buildCart();
+  else if(id==='page-menu') buildMenu();
+  window.scrollTo(0,0);
 }
 
-// ============================================================
-// لوحة التحكم
-// ============================================================
+// ===================== دوال الأدمن =====================
 function checkAdminPass(){
-  if(document.getElementById('admin-pass').value===CONFIG.password){
-    document.getElementById('pass-error').style.display='none';
-    document.getElementById('admin-pass').value='';
-    loadAdminPanel(); goTo('page-admin');
-  } else { document.getElementById('pass-error').style.display='block'; }
+  const passField = document.getElementById('admin-pass');
+  const enteredPass = passField.value;
+  if(enteredPass === CONFIG.password){
+    document.getElementById('pass-error').style.display = 'none';
+    passField.value = '';
+    loadAdminPanel();
+    goTo('page-admin');
+  } else {
+    document.getElementById('pass-error').style.display = 'block';
+    passField.value = '';
+    setTimeout(() => {
+      document.getElementById('pass-error').style.display = 'none';
+    }, 2000);
+  }
 }
 function loadAdminPanel(){
-  const r=CONFIG.rates||DEFAULTS.rates;
-  document.getElementById('cfg-name').value=CONFIG.name;
-  document.getElementById('cfg-whatsapp').value=CONFIG.whatsapp;
-  document.getElementById('cfg-shamcash').value=CONFIG.shamcash;
-  document.getElementById('cfg-syriatel').value=CONFIG.syriatel||'';
-  document.getElementById('cfg-instagram').value=CONFIG.instagram||'';
-  document.getElementById('cfg-facebook').value=CONFIG.facebook||'';
-  document.getElementById('cfg-logo').value=CONFIG.logo||'';
-  document.getElementById('cfg-slides').value=(CONFIG.slides||[]).join(',');
-  document.getElementById('cfg-apikey').value=CONFIG.apiKey;
-  document.getElementById('rate-usd').value=r.usd;
-  document.getElementById('rate-try').value=r.try_rate;
-  const list=document.getElementById('admin-menu-list');
-  list.innerHTML='';
+  document.getElementById('cfg-name').value = CONFIG.name;
+  document.getElementById('cfg-whatsapp').value = CONFIG.whatsapp;
+  document.getElementById('cfg-instagram').value = CONFIG.instagram||'';
+  document.getElementById('cfg-facebook').value = CONFIG.facebook||'';
+  document.getElementById('cfg-logo').value = CONFIG.logo||'';
+  document.getElementById('cfg-delivery').value = CONFIG.deliveryFee;
+  document.getElementById('rate-usd').value = CONFIG.rates.usd;
+  document.getElementById('rate-try').value = CONFIG.rates.try_rate;
+  let listDiv = document.getElementById('admin-menu-list');
+  listDiv.innerHTML = '';
   MENU.forEach((cat,ci)=>{
-    list.innerHTML+=`<div class="admin-cat-header">${cat.cat}<button class="btn-danger" onclick="deleteCat(${ci})">حذف الفئة</button></div>`;
-    cat.items
-  .filter(item=>{
-    const q=(document.getElementById('search-input')?.value||'').toLowerCase();
-    const max=document.getElementById('price-filter')?.value||'all';
-    const matches=item.name.toLowerCase().includes(q);
-    const priceOk=max==='all' || item.price<=parseInt(max);
-    return matches && priceOk;
-  })
-  .forEach(item=>{
-      list.innerHTML+=`
-        <div class="admin-item">
-          <div style="font-size:24px;min-width:36px">${item.emoji}</div>
-          <div class="admin-item-info">
-            <div class="admin-item-name">${item.name}</div>
-            <div class="admin-item-price">${fmtSYP(item.price)}</div>
-          </div>
-          <div style="display:flex;gap:6px">
-            <button class="btn-sm" onclick="openEditItem(${item.id})">تعديل</button>
-            <button class="btn-danger" onclick="deleteItem(${item.id})">حذف</button>
-          </div>
-        </div>`;
+    listDiv.innerHTML += `<div style="background:#1f1c18;padding:8px;display:flex;justify-content:space-between;"><span>${cat.cat}</span><button class="btn-danger" onclick="deleteCat(${ci})">حذف الفئة</button></div>`;
+    cat.items.forEach(item=>{
+      listDiv.innerHTML += `<div class="admin-item"><img class="admin-item-img" src="${item.image || 'https://via.placeholder.com/40'}" onerror="this.src='https://via.placeholder.com/40'"><div style="flex:1;"><div><strong>${item.name}</strong></div><div>${fmtSYP(item.price)}</div><div>${item.available?'✅ متوفر':'❌ غير متوفر'}</div><div style="font-size:10px;">${item.variations?.length||0} حجم, ${item.addons?.length||0} إضافة</div></div><button class="btn-sm" onclick="openEditItem(${item.id})">تعديل</button><button class="btn-danger" onclick="deleteItem(${item.id})">حذف</button><button class="btn-sm" onclick="toggleAvailability(${item.id})">تبديل</button></div>`;
     });
   });
+  buildGalleryPreview();
+}
+function toggleAvailability(id){
+  let item = MENU.flatMap(c=>c.items).find(i=>i.id==id);
+  if(item){ item.available = !item.available; saveData(); buildMenu(); loadAdminPanel(); showToast(item.available?'تم التفعيل':'تم التعطيل'); }
 }
 function saveRates(){
-  const usd=parseFloat(document.getElementById('rate-usd').value);
-  const tryR=parseFloat(document.getElementById('rate-try').value);
-  if(!usd||!tryR){showToast('❌ أدخل القيمتين');return;}
-  if(!CONFIG.rates) CONFIG.rates={};
-  CONFIG.rates.usd=usd; CONFIG.rates.try_rate=tryR;
-  saveData(); 
-let currentLang='ar';
-let currentSlide=0;
-
-function toggleLanguage(){
-  currentLang=currentLang==='ar'?'en':'ar';
-  document.body.dir=currentLang==='ar'?'rtl':'ltr';
-  document.getElementById('rest-name-display').textContent=currentLang==='ar'?CONFIG.name:'Restaurant Menu';
-}
-
-
-function buildPriceFilter(){
-  const filter=document.getElementById('price-filter');
-  if(!filter)return;
-
-  let options=[];
-
-  if(activeCur==='SYP'){
-    options=[
-      ['all','كل الأسعار'],
-      ['10000','حتى 10,000 ل.س'],
-      ['20000','حتى 20,000 ل.س'],
-      ['30000','حتى 30,000 ل.س']
-    ];
-  }
-
-  if(activeCur==='USD'){
-    options=[
-      ['all','All Prices'],
-      ['1','Up to $1'],
-      ['2','Up to $2'],
-      ['5','Up to $5']
-    ];
-  }
-
-  if(activeCur==='TRY'){
-    options=[
-      ['all','Tüm Fiyatlar'],
-      ['50','50₺ altı'],
-      ['100','100₺ altı'],
-      ['200','200₺ altı']
-    ];
-  }
-
-  filter.innerHTML=options.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('');
-}
-
-
-function buildSlider(){
-  const slider=document.getElementById('hero-slider');
-  slider.innerHTML='';
-  (CONFIG.slides||[]).forEach((img,i)=>{
-    slider.innerHTML += `
-      <div class="hero-slide ${i===0?'active':''}" style="background-image:url('${img}')">
-        <div class="hero-overlay"></div>
-        <div class="hero-caption">${CONFIG.name}</div>
-      </div>`;
-  });
-
-  setInterval(()=>{
-    const slides=document.querySelectorAll('.hero-slide');
-    if(!slides.length)return;
-    slides.forEach(s=>s.classList.remove('active'));
-    currentSlide=(currentSlide+1)%slides.length;
-    slides[currentSlide].classList.add('active');
-  },4000);
-}
-
-
-function saveCartState(){
-  localStorage.setItem('saved_cart', JSON.stringify(cart));
-}
-
-function loadCartState(){
-  const saved=localStorage.getItem('saved_cart');
-  if(saved){
-    cart=JSON.parse(saved);
-  }
-}
-
-
-function clearCart(){
-  cart={};
-  buildMenu();
-  buildCart();
-  showToast('🗑️ تم مسح السلة');
-}
-
-
-loadCartState();
-buildSlider();
-buildMenu(); buildRatesBanner();
-  buildPriceFilter();
-  showToast('✅ تم تحديث أسعار الصرف');
+  CONFIG.rates.usd = parseFloat(document.getElementById('rate-usd').value);
+  CONFIG.rates.try_rate = parseFloat(document.getElementById('rate-try').value);
+  saveData(); buildRatesBanner(); showToast('✅ تم تحديث أسعار الصرف');
 }
 function saveConfig(){
-  const name=document.getElementById('cfg-name').value.trim();
-  const wa=document.getElementById('cfg-whatsapp').value.trim();
-  if(!name||!wa){showToast('❌ الاسم والواتساب مطلوبان');return;}
-  CONFIG.name=name; CONFIG.whatsapp=wa;
-  CONFIG.shamcash=document.getElementById('cfg-shamcash').value.trim();
-  CONFIG.syriatel=document.getElementById('cfg-syriatel').value.trim();
-  CONFIG.instagram=document.getElementById('cfg-instagram').value.trim();
-  CONFIG.facebook=document.getElementById('cfg-facebook').value.trim();
-  CONFIG.logo=document.getElementById('cfg-logo').value.trim();
-  CONFIG.slides=document.getElementById('cfg-slides').value.split(',').map(s=>s.trim()).filter(Boolean);
-  const ak=document.getElementById('cfg-apikey').value.trim();
-  const pw=document.getElementById('cfg-password').value.trim();
-  if(ak) CONFIG.apiKey=ak;
-  if(pw) CONFIG.password=pw;
-  saveData(); 
-let currentLang='ar';
-let currentSlide=0;
-
-function toggleLanguage(){
-  currentLang=currentLang==='ar'?'en':'ar';
-  document.body.dir=currentLang==='ar'?'rtl':'ltr';
-  document.getElementById('rest-name-display').textContent=currentLang==='ar'?CONFIG.name:'Restaurant Menu';
+  CONFIG.name = document.getElementById('cfg-name').value;
+  CONFIG.whatsapp = document.getElementById('cfg-whatsapp').value;
+  CONFIG.instagram = document.getElementById('cfg-instagram').value;
+  CONFIG.facebook = document.getElementById('cfg-facebook').value;
+  CONFIG.logo = document.getElementById('cfg-logo').value;
+  CONFIG.deliveryFee = parseInt(document.getElementById('cfg-delivery').value) || 0;
+  let newPass = document.getElementById('cfg-password').value;
+  if(newPass) CONFIG.password = newPass;
+  let logoFile = document.getElementById('cfg-logo-file').files[0];
+  if(logoFile){
+    let reader = new FileReader();
+    reader.onload = e => { CONFIG.logo = e.target.result; saveData(); loadAdminPanel(); buildMenu(); };
+    reader.readAsDataURL(logoFile);
+  } else { saveData(); loadAdminPanel(); buildMenu(); }
+  showToast('✅ تم حفظ الإعدادات');
 }
-
-
-function buildPriceFilter(){
-  const filter=document.getElementById('price-filter');
-  if(!filter)return;
-
-  let options=[];
-
-  if(activeCur==='SYP'){
-    options=[
-      ['all','كل الأسعار'],
-      ['10000','حتى 10,000 ل.س'],
-      ['20000','حتى 20,000 ل.س'],
-      ['30000','حتى 30,000 ل.س']
-    ];
-  }
-
-  if(activeCur==='USD'){
-    options=[
-      ['all','All Prices'],
-      ['1','Up to $1'],
-      ['2','Up to $2'],
-      ['5','Up to $5']
-    ];
-  }
-
-  if(activeCur==='TRY'){
-    options=[
-      ['all','Tüm Fiyatlar'],
-      ['50','50₺ altı'],
-      ['100','100₺ altı'],
-      ['200','200₺ altı']
-    ];
-  }
-
-  filter.innerHTML=options.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('');
-}
-
-
-function buildSlider(){
-  const slider=document.getElementById('hero-slider');
-  slider.innerHTML='';
-  (CONFIG.slides||[]).forEach((img,i)=>{
-    slider.innerHTML += `
-      <div class="hero-slide ${i===0?'active':''}" style="background-image:url('${img}')">
-        <div class="hero-overlay"></div>
-        <div class="hero-caption">${CONFIG.name}</div>
-      </div>`;
+function buildGalleryPreview(){
+  let container = document.getElementById('gallery-preview');
+  container.innerHTML = '';
+  (CONFIG.slides||[]).forEach((src,idx)=>{
+    let div = document.createElement('div');
+    div.className = 'gallery-img-card';
+    div.innerHTML = `<img src="${src}"><div class="remove-img" onclick="removeGalleryImage(${idx})">✖</div>`;
+    container.appendChild(div);
   });
-
-  setInterval(()=>{
-    const slides=document.querySelectorAll('.hero-slide');
-    if(!slides.length)return;
-    slides.forEach(s=>s.classList.remove('active'));
-    currentSlide=(currentSlide+1)%slides.length;
-    slides[currentSlide].classList.add('active');
-  },4000);
 }
-
-
-function saveCartState(){
-  localStorage.setItem('saved_cart', JSON.stringify(cart));
+function uploadGalleryImages(){
+  let files = document.getElementById('gallery-files').files;
+  Array.from(files).forEach(file=>{
+    let reader = new FileReader();
+    reader.onload = e=>{ CONFIG.slides.push(e.target.result); saveData(); buildSlider(); buildGalleryPreview(); };
+    reader.readAsDataURL(file);
+  });
+  showToast('✅ تمت إضافة الصور');
 }
-
-function loadCartState(){
-  const saved=localStorage.getItem('saved_cart');
-  if(saved){
-    cart=JSON.parse(saved);
-  }
-}
-
-
-function clearCart(){
-  cart={};
-  buildMenu();
-  buildCart();
-  showToast('🗑️ تم مسح السلة');
-}
-
-
-loadCartState();
-buildSlider();
-buildMenu(); showToast('✅ تم حفظ الإعدادات');
+function removeGalleryImage(idx){
+  CONFIG.slides.splice(idx,1);
+  saveData(); buildSlider(); buildGalleryPreview();
 }
 function addCategory(){
-  const name=document.getElementById('new-cat-name').value.trim();
-  if(!name){showToast('❌ أدخل اسم الفئة');return;}
-  MENU.push({cat:name,items:[]});
+  let name = document.getElementById('new-cat-name').value.trim();
+  if(!name){ showToast('❌ أدخل اسم الفئة'); return; }
+  MENU.push({cat:name, items:[]});
   saveData(); loadAdminPanel();
-  document.getElementById('new-cat-name').value='';
+  document.getElementById('new-cat-name').value = '';
+  buildMenu();
   showToast('✅ تمت إضافة الفئة');
 }
 function deleteCat(ci){
-  if(!confirm('حذف هذه الفئة وكل عناصرها؟'))return;
-  MENU.splice(ci,1); if(activeCat>=MENU.length)activeCat=0;
-  saveData(); 
-let currentLang='ar';
-let currentSlide=0;
-
-function toggleLanguage(){
-  currentLang=currentLang==='ar'?'en':'ar';
-  document.body.dir=currentLang==='ar'?'rtl':'ltr';
-  document.getElementById('rest-name-display').textContent=currentLang==='ar'?CONFIG.name:'Restaurant Menu';
-}
-
-
-function buildPriceFilter(){
-  const filter=document.getElementById('price-filter');
-  if(!filter)return;
-
-  let options=[];
-
-  if(activeCur==='SYP'){
-    options=[
-      ['all','كل الأسعار'],
-      ['10000','حتى 10,000 ل.س'],
-      ['20000','حتى 20,000 ل.س'],
-      ['30000','حتى 30,000 ل.س']
-    ];
-  }
-
-  if(activeCur==='USD'){
-    options=[
-      ['all','All Prices'],
-      ['1','Up to $1'],
-      ['2','Up to $2'],
-      ['5','Up to $5']
-    ];
-  }
-
-  if(activeCur==='TRY'){
-    options=[
-      ['all','Tüm Fiyatlar'],
-      ['50','50₺ altı'],
-      ['100','100₺ altı'],
-      ['200','200₺ altı']
-    ];
-  }
-
-  filter.innerHTML=options.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('');
-}
-
-
-function buildSlider(){
-  const slider=document.getElementById('hero-slider');
-  slider.innerHTML='';
-  (CONFIG.slides||[]).forEach((img,i)=>{
-    slider.innerHTML += `
-      <div class="hero-slide ${i===0?'active':''}" style="background-image:url('${img}')">
-        <div class="hero-overlay"></div>
-        <div class="hero-caption">${CONFIG.name}</div>
-      </div>`;
-  });
-
-  setInterval(()=>{
-    const slides=document.querySelectorAll('.hero-slide');
-    if(!slides.length)return;
-    slides.forEach(s=>s.classList.remove('active'));
-    currentSlide=(currentSlide+1)%slides.length;
-    slides[currentSlide].classList.add('active');
-  },4000);
-}
-
-
-function saveCartState(){
-  localStorage.setItem('saved_cart', JSON.stringify(cart));
-}
-
-function loadCartState(){
-  const saved=localStorage.getItem('saved_cart');
-  if(saved){
-    cart=JSON.parse(saved);
-  }
-}
-
-
-function clearCart(){
-  cart={};
-  buildMenu();
-  buildCart();
-  showToast('🗑️ تم مسح السلة');
-}
-
-
-loadCartState();
-buildSlider();
-buildMenu(); loadAdminPanel(); showToast('✅ تم الحذف');
-}
-function openAddItem(){
-  document.getElementById('modal-title').textContent='إضافة صنف جديد';
-  document.getElementById('modal-item-id').value='';
-  ['modal-emoji','modal-name','modal-desc','modal-price'].forEach(id=>document.getElementById(id).value='');
-  buildCatSelect(-1); document.getElementById('item-modal').classList.add('active');
-}
-function openEditItem(id){
-  const item=MENU.flatMap(c=>c.items).find(i=>i.id===id);
-  const ci=MENU.findIndex(c=>c.items.some(i=>i.id===id));
-  document.getElementById('modal-title').textContent='تعديل الصنف';
-  document.getElementById('modal-item-id').value=id;
-  document.getElementById('modal-emoji').value=item.emoji;
-  document.getElementById('modal-name').value=item.name;
-  document.getElementById('modal-desc').value=item.desc;
-  document.getElementById('modal-price').value=item.price;
-  buildCatSelect(ci); document.getElementById('item-modal').classList.add('active');
-}
-function buildCatSelect(sel){
-  const s=document.getElementById('modal-cat'); s.innerHTML='';
-  MENU.forEach((cat,i)=>{ s.innerHTML+=`<option value="${i}" ${i===sel?'selected':''}>${cat.cat}</option>`; });
-}
-function saveItem(){
-  const id=document.getElementById('modal-item-id').value;
-  const ci=parseInt(document.getElementById('modal-cat').value);
-  const emoji=document.getElementById('modal-emoji').value.trim()||'🍽️';
-  const name=document.getElementById('modal-name').value.trim();
-  const desc=document.getElementById('modal-desc').value.trim();
-  const price=parseInt(document.getElementById('modal-price').value);
-  if(!name||!price){showToast('❌ الاسم والسعر مطلوبان');return;}
-  if(id){ MENU.forEach(cat=>{ const item=cat.items.find(i=>i.id==id); if(item){item.emoji=emoji;item.name=name;item.desc=desc;item.price=price;} }); }
-  else { MENU[ci].items.push({id:nextId++,name,price,desc,emoji}); }
-  saveData(); 
-let currentLang='ar';
-let currentSlide=0;
-
-function toggleLanguage(){
-  currentLang=currentLang==='ar'?'en':'ar';
-  document.body.dir=currentLang==='ar'?'rtl':'ltr';
-  document.getElementById('rest-name-display').textContent=currentLang==='ar'?CONFIG.name:'Restaurant Menu';
-}
-
-
-function buildPriceFilter(){
-  const filter=document.getElementById('price-filter');
-  if(!filter)return;
-
-  let options=[];
-
-  if(activeCur==='SYP'){
-    options=[
-      ['all','كل الأسعار'],
-      ['10000','حتى 10,000 ل.س'],
-      ['20000','حتى 20,000 ل.س'],
-      ['30000','حتى 30,000 ل.س']
-    ];
-  }
-
-  if(activeCur==='USD'){
-    options=[
-      ['all','All Prices'],
-      ['1','Up to $1'],
-      ['2','Up to $2'],
-      ['5','Up to $5']
-    ];
-  }
-
-  if(activeCur==='TRY'){
-    options=[
-      ['all','Tüm Fiyatlar'],
-      ['50','50₺ altı'],
-      ['100','100₺ altı'],
-      ['200','200₺ altı']
-    ];
-  }
-
-  filter.innerHTML=options.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('');
-}
-
-
-function buildSlider(){
-  const slider=document.getElementById('hero-slider');
-  slider.innerHTML='';
-  (CONFIG.slides||[]).forEach((img,i)=>{
-    slider.innerHTML += `
-      <div class="hero-slide ${i===0?'active':''}" style="background-image:url('${img}')">
-        <div class="hero-overlay"></div>
-        <div class="hero-caption">${CONFIG.name}</div>
-      </div>`;
-  });
-
-  setInterval(()=>{
-    const slides=document.querySelectorAll('.hero-slide');
-    if(!slides.length)return;
-    slides.forEach(s=>s.classList.remove('active'));
-    currentSlide=(currentSlide+1)%slides.length;
-    slides[currentSlide].classList.add('active');
-  },4000);
-}
-
-
-function saveCartState(){
-  localStorage.setItem('saved_cart', JSON.stringify(cart));
-}
-
-function loadCartState(){
-  const saved=localStorage.getItem('saved_cart');
-  if(saved){
-    cart=JSON.parse(saved);
-  }
-}
-
-
-function clearCart(){
-  cart={};
-  buildMenu();
-  buildCart();
-  showToast('🗑️ تم مسح السلة');
-}
-
-
-loadCartState();
-buildSlider();
-buildMenu(); loadAdminPanel(); closeModal(); showToast('✅ تم الحفظ');
+  if(!confirm('حذف هذه الفئة وكل عناصرها؟')) return;
+  MENU.splice(ci,1);
+  if(activeCat >= MENU.length) activeCat = 0;
+  saveData(); buildMenu(); loadAdminPanel(); showToast('✅ تم الحذف');
 }
 function deleteItem(id){
-  if(!confirm('حذف هذا الصنف؟'))return;
-  MENU.forEach(cat=>{cat.items=cat.items.filter(i=>i.id!==id);}); delete cart[id];
-  saveData(); 
-let currentLang='ar';
-let currentSlide=0;
-
-function toggleLanguage(){
-  currentLang=currentLang==='ar'?'en':'ar';
-  document.body.dir=currentLang==='ar'?'rtl':'ltr';
-  document.getElementById('rest-name-display').textContent=currentLang==='ar'?CONFIG.name:'Restaurant Menu';
+  if(!confirm('حذف هذا الصنف؟')) return;
+  for(let cat of MENU) cat.items = cat.items.filter(i=>i.id!==id);
+  saveData(); buildMenu(); loadAdminPanel(); showToast('✅ تم الحذف');
 }
-
-
-function buildPriceFilter(){
-  const filter=document.getElementById('price-filter');
-  if(!filter)return;
-
-  let options=[];
-
-  if(activeCur==='SYP'){
-    options=[
-      ['all','كل الأسعار'],
-      ['10000','حتى 10,000 ل.س'],
-      ['20000','حتى 20,000 ل.س'],
-      ['30000','حتى 30,000 ل.س']
-    ];
-  }
-
-  if(activeCur==='USD'){
-    options=[
-      ['all','All Prices'],
-      ['1','Up to $1'],
-      ['2','Up to $2'],
-      ['5','Up to $5']
-    ];
-  }
-
-  if(activeCur==='TRY'){
-    options=[
-      ['all','Tüm Fiyatlar'],
-      ['50','50₺ altı'],
-      ['100','100₺ altı'],
-      ['200','200₺ altı']
-    ];
-  }
-
-  filter.innerHTML=options.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('');
+let variationCounter = 0, addonCounter = 0;
+function addVariationField(){
+  let div = document.getElementById('variations-container');
+  div.innerHTML += `<div class="variation-item" style="margin-bottom:10px;padding:8px;background:#2a2520;border-radius:8px;">
+    <input type="text" placeholder="اسم الحجم (مثل: صغير)" class="form-input var-name" style="margin-bottom:5px;">
+    <div class="var-options"></div>
+    <button type="button" class="btn-sm" onclick="addOptionToVariation(this)">+ إضافة خيار (سعر)</button>
+    <button type="button" class="btn-danger" style="margin-top:5px;" onclick="this.parentElement.remove()">حذف الحجم</button>
+  </div>`;
 }
-
-
-function buildSlider(){
-  const slider=document.getElementById('hero-slider');
-  slider.innerHTML='';
-  (CONFIG.slides||[]).forEach((img,i)=>{
-    slider.innerHTML += `
-      <div class="hero-slide ${i===0?'active':''}" style="background-image:url('${img}')">
-        <div class="hero-overlay"></div>
-        <div class="hero-caption">${CONFIG.name}</div>
-      </div>`;
+function addOptionToVariation(btn){
+  let container = btn.parentElement.querySelector('.var-options');
+  container.innerHTML += `<div style="display:flex;gap:5px;margin:5px 0;"><input type="text" placeholder="الاسم (مثل: وسط)" class="form-input opt-name" style="flex:1;"><input type="number" placeholder="سعر إضافي" class="form-input opt-price" style="width:80px;"><button class="btn-sm" onclick="this.parentElement.remove()">✖</button></div>`;
+}
+function addAddonField(){
+  let div = document.getElementById('addons-container');
+  div.innerHTML += `<div class="addon-item" style="display:flex;gap:5px;margin-bottom:5px;">
+    <input type="text" placeholder="اسم الإضافة (جبنة)" class="form-input addon-name" style="flex:1;">
+    <input type="number" placeholder="سعر إضافي" class="form-input addon-price" style="width:100px;">
+    <button class="btn-sm" onclick="this.parentElement.remove()">حذف</button>
+  </div>`;
+}
+function collectVariationsFromUI(){
+  let variations = [];
+  document.querySelectorAll('#variations-container .variation-item').forEach(item => {
+    let name = item.querySelector('.var-name')?.value.trim();
+    if(!name) return;
+    let options = [];
+    item.querySelectorAll('.var-options > div').forEach(optDiv => {
+      let optName = optDiv.querySelector('.opt-name')?.value.trim();
+      let optPrice = parseInt(optDiv.querySelector('.opt-price')?.value) || 0;
+      if(optName) options.push({ name: optName, price: optPrice });
+    });
+    if(options.length) variations.push({ name, options });
   });
-
-  setInterval(()=>{
-    const slides=document.querySelectorAll('.hero-slide');
-    if(!slides.length)return;
-    slides.forEach(s=>s.classList.remove('active'));
-    currentSlide=(currentSlide+1)%slides.length;
-    slides[currentSlide].classList.add('active');
-  },4000);
+  return variations;
 }
-
-
-function saveCartState(){
-  localStorage.setItem('saved_cart', JSON.stringify(cart));
+function collectAddonsFromUI(){
+  let addons = [];
+  document.querySelectorAll('#addons-container .addon-item').forEach(item => {
+    let name = item.querySelector('.addon-name')?.value.trim();
+    let price = parseInt(item.querySelector('.addon-price')?.value) || 0;
+    if(name) addons.push({ name, price });
+  });
+  return addons;
 }
-
-function loadCartState(){
-  const saved=localStorage.getItem('saved_cart');
-  if(saved){
-    cart=JSON.parse(saved);
+function loadVariationsAndAddonsForEdit(item){
+  let varsContainer = document.getElementById('variations-container');
+  let addonsContainer = document.getElementById('addons-container');
+  varsContainer.innerHTML = '';
+  addonsContainer.innerHTML = '';
+  (item.variations||[]).forEach(v => {
+    varsContainer.innerHTML += `<div class="variation-item" style="margin-bottom:10px;padding:8px;background:#2a2520;border-radius:8px;">
+      <input type="text" placeholder="اسم الحجم" class="form-input var-name" value="${v.name}" style="margin-bottom:5px;">
+      <div class="var-options"></div>
+      <button type="button" class="btn-sm" onclick="addOptionToVariation(this)">+ إضافة خيار (سعر)</button>
+      <button type="button" class="btn-danger" style="margin-top:5px;" onclick="this.parentElement.remove()">حذف الحجم</button>
+    </div>`;
+    let lastItem = varsContainer.lastElementChild;
+    let optsContainer = lastItem.querySelector('.var-options');
+    v.options.forEach(opt => {
+      optsContainer.innerHTML += `<div style="display:flex;gap:5px;margin:5px 0;"><input type="text" placeholder="الاسم" class="form-input opt-name" value="${opt.name}" style="flex:1;"><input type="number" placeholder="سعر إضافي" class="form-input opt-price" value="${opt.price}" style="width:80px;"><button class="btn-sm" onclick="this.parentElement.remove()">✖</button></div>`;
+    });
+  });
+  (item.addons||[]).forEach(ad => {
+    addonsContainer.innerHTML += `<div class="addon-item" style="display:flex;gap:5px;margin-bottom:5px;">
+      <input type="text" placeholder="اسم الإضافة" class="form-input addon-name" value="${ad.name}" style="flex:1;">
+      <input type="number" placeholder="سعر إضافي" class="form-input addon-price" value="${ad.price}" style="width:100px;">
+      <button class="btn-sm" onclick="this.parentElement.remove()">حذف</button>
+    </div>`;
+  });
+}
+function openAddItem(){
+  document.getElementById('modal-title').innerText = 'إضافة صنف جديد';
+  document.getElementById('modal-item-id').value = '';
+  document.getElementById('modal-name').value = '';
+  document.getElementById('modal-desc').value = '';
+  document.getElementById('modal-price').value = '';
+  document.getElementById('modal-image-file').value = '';
+  document.getElementById('modal-image-url').value = '';
+  document.getElementById('image-preview').style.display = 'none';
+  document.getElementById('variations-container').innerHTML = '';
+  document.getElementById('addons-container').innerHTML = '';
+  variationCounter = 0; addonCounter = 0;
+  let sel = document.getElementById('modal-cat');
+  sel.innerHTML = MENU.map((c,i)=>`<option value="${i}">${c.cat}</option>`).join('');
+  document.getElementById('item-modal').classList.add('active');
+}
+function openEditItem(id){
+  let item = MENU.flatMap(c=>c.items).find(i=>i.id===id);
+  let ci = MENU.findIndex(c=>c.items.some(i=>i.id===id));
+  document.getElementById('modal-title').innerText = 'تعديل الصنف';
+  document.getElementById('modal-item-id').value = id;
+  document.getElementById('modal-name').value = item.name;
+  document.getElementById('modal-desc').value = item.desc;
+  document.getElementById('modal-price').value = item.price;
+  document.getElementById('modal-image-url').value = item.image || '';
+  document.getElementById('modal-image-file').value = '';
+  if(item.image && item.image.trim() !== ''){
+    let preview = document.getElementById('image-preview');
+    preview.style.display = 'block';
+    preview.querySelector('img').src = item.image;
+  } else {
+    document.getElementById('image-preview').style.display = 'none';
   }
+  loadVariationsAndAddonsForEdit(item);
+  let sel = document.getElementById('modal-cat');
+  sel.innerHTML = MENU.map((c,i)=>`<option value="${i}" ${i===ci?'selected':''}>${c.cat}</option>`).join('');
+  document.getElementById('item-modal').classList.add('active');
 }
-
-
-function clearCart(){
-  cart={};
-  buildMenu();
-  buildCart();
-  showToast('🗑️ تم مسح السلة');
+function saveItem(){
+  let id = document.getElementById('modal-item-id').value;
+  let catIdx = parseInt(document.getElementById('modal-cat').value);
+  let name = document.getElementById('modal-name').value.trim();
+  let desc = document.getElementById('modal-desc').value.trim();
+  let price = parseInt(document.getElementById('modal-price').value);
+  let imageUrl = document.getElementById('modal-image-url').value.trim();
+  let imageFile = document.getElementById('modal-image-file').files[0];
+  let variations = collectVariationsFromUI();
+  let addons = collectAddonsFromUI();
+  if(!name || isNaN(price)){ showToast('❌ الاسم والسعر مطلوبان'); return; }
+  let finalImage = imageUrl;
+  if(imageFile){
+    const reader = new FileReader();
+    reader.onload = e => {
+      finalImage = e.target.result;
+      saveItemData(id, catIdx, name, desc, price, finalImage, variations, addons);
+    };
+    reader.readAsDataURL(imageFile);
+    return;
+  }
+  saveItemData(id, catIdx, name, desc, price, finalImage, variations, addons);
 }
-
-
-loadCartState();
-buildSlider();
-buildMenu(); loadAdminPanel(); showToast('✅ تم الحذف');
+function saveItemData(id, catIdx, name, desc, price, image, variations, addons){
+  if(id){
+    let item = MENU.flatMap(c=>c.items).find(i=>i.id==id);
+    if(item){
+      item.name = name; item.desc = desc; item.price = price; item.image = image;
+      item.variations = variations; item.addons = addons;
+      saveData(); loadAdminPanel(); buildMenu();
+    }
+  } else {
+    let newId = nextId++;
+    MENU[catIdx].items.push({ id:newId, name, desc, price, image, variations, addons, available:true });
+    saveData(); loadAdminPanel(); buildMenu();
+  }
+  closeModal(); showToast('✅ تم الحفظ');
 }
 function closeModal(){ document.getElementById('item-modal').classList.remove('active'); }
-function saveData(){ localStorage.setItem('resto_config',JSON.stringify(CONFIG)); localStorage.setItem('resto_menu',JSON.stringify(MENU)); }
-function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.style.opacity=1; setTimeout(()=>t.style.opacity=0,2500); }
-function goTo(id){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById(id).classList.add('active'); window.scrollTo(0,0);
-  if(id==='page-cart') buildCart();
-  if(id==='page-payment') buildPayment();
-}
-function resetOrder(){
-  cart={}; ['table-number','order-note','tran-id-sc','tran-id-sy'].forEach(id=>document.getElementById(id).value='');
-  
-let currentLang='ar';
-let currentSlide=0;
 
-function toggleLanguage(){
-  currentLang=currentLang==='ar'?'en':'ar';
-  document.body.dir=currentLang==='ar'?'rtl':'ltr';
-  document.getElementById('rest-name-display').textContent=currentLang==='ar'?CONFIG.name:'Restaurant Menu';
-}
-
-
-function buildPriceFilter(){
-  const filter=document.getElementById('price-filter');
-  if(!filter)return;
-
-  let options=[];
-
-  if(activeCur==='SYP'){
-    options=[
-      ['all','كل الأسعار'],
-      ['10000','حتى 10,000 ل.س'],
-      ['20000','حتى 20,000 ل.س'],
-      ['30000','حتى 30,000 ل.س']
-    ];
+// معاينة الصورة في المودال
+document.getElementById('modal-image-file')?.addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if(file){
+    const reader = new FileReader();
+    reader.onload = function(ev){
+      const preview = document.getElementById('image-preview');
+      preview.style.display = 'block';
+      preview.querySelector('img').src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
   }
-
-  if(activeCur==='USD'){
-    options=[
-      ['all','All Prices'],
-      ['1','Up to $1'],
-      ['2','Up to $2'],
-      ['5','Up to $5']
-    ];
+});
+document.getElementById('modal-image-url')?.addEventListener('input', function(){
+  const url = this.value.trim();
+  if(url){
+    const preview = document.getElementById('image-preview');
+    preview.style.display = 'block';
+    preview.querySelector('img').src = url;
+  } else {
+    document.getElementById('image-preview').style.display = 'none';
   }
+});
 
-  if(activeCur==='TRY'){
-    options=[
-      ['all','Tüm Fiyatlar'],
-      ['50','50₺ altı'],
-      ['100','100₺ altı'],
-      ['200','200₺ altı']
-    ];
-  }
-
-  filter.innerHTML=options.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('');
-}
-
-
-function buildSlider(){
-  const slider=document.getElementById('hero-slider');
-  slider.innerHTML='';
-  (CONFIG.slides||[]).forEach((img,i)=>{
-    slider.innerHTML += `
-      <div class="hero-slide ${i===0?'active':''}" style="background-image:url('${img}')">
-        <div class="hero-overlay"></div>
-        <div class="hero-caption">${CONFIG.name}</div>
-      </div>`;
-  });
-
-  setInterval(()=>{
-    const slides=document.querySelectorAll('.hero-slide');
-    if(!slides.length)return;
-    slides.forEach(s=>s.classList.remove('active'));
-    currentSlide=(currentSlide+1)%slides.length;
-    slides[currentSlide].classList.add('active');
-  },4000);
-}
-
-
-function saveCartState(){
-  localStorage.setItem('saved_cart', JSON.stringify(cart));
-}
-
-function loadCartState(){
-  const saved=localStorage.getItem('saved_cart');
-  if(saved){
-    cart=JSON.parse(saved);
-  }
-}
-
-
-function clearCart(){
-  cart={};
-  buildMenu();
-  buildCart();
-  showToast('🗑️ تم مسح السلة');
-}
-
-
-loadCartState();
-buildSlider();
-buildMenu(); goTo('page-menu');
-}
-
-let currentLang='ar';
-let currentSlide=0;
-
-function toggleLanguage(){
-  currentLang=currentLang==='ar'?'en':'ar';
-  document.body.dir=currentLang==='ar'?'rtl':'ltr';
-  document.getElementById('rest-name-display').textContent=currentLang==='ar'?CONFIG.name:'Restaurant Menu';
-}
-
-
-function buildPriceFilter(){
-  const filter=document.getElementById('price-filter');
-  if(!filter)return;
-
-  let options=[];
-
-  if(activeCur==='SYP'){
-    options=[
-      ['all','كل الأسعار'],
-      ['10000','حتى 10,000 ل.س'],
-      ['20000','حتى 20,000 ل.س'],
-      ['30000','حتى 30,000 ل.س']
-    ];
-  }
-
-  if(activeCur==='USD'){
-    options=[
-      ['all','All Prices'],
-      ['1','Up to $1'],
-      ['2','Up to $2'],
-      ['5','Up to $5']
-    ];
-  }
-
-  if(activeCur==='TRY'){
-    options=[
-      ['all','Tüm Fiyatlar'],
-      ['50','50₺ altı'],
-      ['100','100₺ altı'],
-      ['200','200₺ altı']
-    ];
-  }
-
-  filter.innerHTML=options.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('');
-}
-
-
-function buildSlider(){
-  const slider=document.getElementById('hero-slider');
-  slider.innerHTML='';
-  (CONFIG.slides||[]).forEach((img,i)=>{
-    slider.innerHTML += `
-      <div class="hero-slide ${i===0?'active':''}" style="background-image:url('${img}')">
-        <div class="hero-overlay"></div>
-        <div class="hero-caption">${CONFIG.name}</div>
-      </div>`;
-  });
-
-  setInterval(()=>{
-    const slides=document.querySelectorAll('.hero-slide');
-    if(!slides.length)return;
-    slides.forEach(s=>s.classList.remove('active'));
-    currentSlide=(currentSlide+1)%slides.length;
-    slides[currentSlide].classList.add('active');
-  },4000);
-}
-
-
-function saveCartState(){
-  localStorage.setItem('saved_cart', JSON.stringify(cart));
-}
-
-function loadCartState(){
-  const saved=localStorage.getItem('saved_cart');
-  if(saved){
-    cart=JSON.parse(saved);
-  }
-}
-
-
-function clearCart(){
-  cart={};
-  buildMenu();
-  buildCart();
-  showToast('🗑️ تم مسح السلة');
-}
-
-
-loadCartState();
-buildSlider();
+// بدء التشغيل
+updateAllTexts();
 buildMenu();
 </script>
 </body>
