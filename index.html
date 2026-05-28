@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>مطعم الجسري</title>
+<title>نظام طلب المطعم</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
@@ -15,9 +15,8 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
 .page.active{display:block;}
 .header{background:linear-gradient(135deg,#c8963e,#e8b86d,#c8963e);padding:12px 16px 10px;position:sticky;top:0;z-index:50;border-radius:0 0 24px 24px;}
 .top-header-row{display:flex;justify-content:space-between;align-items:center;gap:10px;}
-.logo-box{width:56px;height:56px;background:rgba(0,0,0,0.1);border-radius:20px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.logo-box{width:70px;height:70px;background:rgba(0,0,0,0.1);border-radius:20px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
 .logo-box img{width:100%;height:100%;object-fit:cover;}
-.lang-switch{background:rgba(0,0,0,0.2);padding:6px 14px;border-radius:40px;font-size:12px;font-weight:800;color:#1a1208;cursor:pointer;}
 .cur-switch{display:flex;gap:3px;background:rgba(0,0,0,0.15);border-radius:999px;padding:3px;}
 .cur-btn{padding:4px 12px;border-radius:999px;border:none;cursor:pointer;font-size:11px;font-weight:800;background:transparent;color:#3d2a08;}
 .cur-btn.active{background:#1a1208;color:var(--gold-light);}
@@ -95,7 +94,6 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
 <div id="page-menu" class="page active">
   <div class="header">
     <div class="top-header-row">
-      <div class="lang-switch" onclick="toggleLanguage()">AR | EN</div>
       <div class="logo-box" id="logo-box"></div>
       <div class="cur-switch" id="cur-switch">
         <button class="cur-btn active" onclick="setCurrency('SYP',this)">ل.س جديدة</button>
@@ -120,7 +118,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
   <div id="menu-content"></div>
   <button id="float-cart" onclick="goTo('page-cart')">
     <div class="cart-badge" id="cart-count">0</div>
-    <span id="float-cart-text">عرض السلة</span>
+    <span>عرض السلة</span>
     <span id="cart-total-float">0</span>
   </button>
 </div>
@@ -128,23 +126,23 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
 <!-- سلة الطلبات -->
 <div id="page-cart" class="page">
   <div style="background:linear-gradient(135deg,#c8963e,#e8b86d);padding:18px;"><h2 style="color:#1a1208;">🛒 سلة الطلبات</h2><p id="cart-cur-label"></p></div>
-  <button class="back-btn" onclick="goTo('page-menu')"><span id="back-add">← إضافة المزيد</span></button>
+  <button class="back-btn" onclick="goTo('page-menu')">← إضافة المزيد</button>
   <div class="form-wrap">
-    <label class="form-label" id="lbl-name">👤 الاسم</label><input class="form-input" id="customer-name">
-    <label class="form-label" id="lbl-address">📍 العنوان</label><input class="form-input" id="customer-address">
-    <label class="form-label" id="lbl-table">🪑 رقم الطاولة (اختياري)</label><input class="form-input" id="table-number">
-    <label class="form-label" id="lbl-delivery-time">⏰ وقت التوصيل (اختياري)</label><input class="form-input" id="delivery-time" type="datetime-local">
-    <label class="form-label" id="lbl-items">طلباتك</label><div id="cart-items-list"></div>
-    <label class="form-label" id="lbl-notes">📝 ملاحظات (اختياري)</label><textarea class="form-input" id="order-note"></textarea>
+    <label class="form-label">👤 الاسم</label><input class="form-input" id="customer-name">
+    <label class="form-label">📍 العنوان</label><input class="form-input" id="customer-address">
+    <label class="form-label">🪑 رقم الطاولة (اختياري)</label><input class="form-input" id="table-number">
+    <label class="form-label">⏰ وقت التوصيل (اختياري)</label><input class="form-input" id="delivery-time" type="datetime-local">
+    <label class="form-label">طلباتك</label><div id="cart-items-list"></div>
+    <label class="form-label">📝 ملاحظات (اختياري)</label><textarea class="form-input" id="order-note"></textarea>
     <div class="info-box">
-      <div class="row"><span id="items-count-label">عدد الأصناف</span><span id="cart-kinds">0</span></div>
-      <div class="row"><span id="subtotal-label">المجموع الفرعي</span><span id="cart-subtotal">0</span></div>
-      <div class="row"><span id="delivery-label">سعر التوصيل</span><span id="cart-delivery">0</span></div>
-      <div class="total"><span id="total-label">المجموع النهائي</span><span id="cart-total-page">0</span></div>
-      <div class="row" id="syp-row" style="display:none"><span id="syp-label">بالليرة السورية الجديدة</span><span id="cart-syp">0</span></div>
+      <div class="row"><span>عدد الأصناف</span><span id="cart-kinds">0</span></div>
+      <div class="row"><span>المجموع الفرعي</span><span id="cart-subtotal">0</span></div>
+      <div class="row"><span>سعر التوصيل</span><span id="cart-delivery">0</span></div>
+      <div class="total"><span>المجموع النهائي</span><span id="cart-total-page">0</span></div>
+      <div class="row" id="syp-row" style="display:none"><span>بالليرة السورية الجديدة</span><span id="cart-syp">0</span></div>
     </div>
-    <button class="btn-primary" id="send-wa-btn" onclick="sendWhatsApp()">📱 إرسال الطلب عبر واتساب</button>
-    <button class="btn-secondary" id="clear-cart-btn" onclick="clearCart()">🗑️ مسح السلة</button>
+    <button class="btn-primary" onclick="sendWhatsApp()">📱 إرسال الطلب عبر واتساب</button>
+    <button class="btn-secondary" onclick="clearCart()">🗑️ مسح السلة</button>
   </div>
 </div>
 
@@ -152,7 +150,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
 <div id="page-admin-login" class="page">
   <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;">
     <div style="font-size:60px;">🔐</div>
-    <h2 id="admin-login-title">لوحة التحكم</h2>
+    <h2>لوحة التحكم</h2>
     <input class="form-input" id="admin-pass" type="password" placeholder="كلمة المرور" style="max-width:280px;">
     <button class="btn-primary" onclick="checkAdminPass()" style="max-width:280px;">دخول ←</button>
     <button class="btn-secondary" onclick="goTo('page-menu')" style="max-width:280px;">العودة للمنيو</button>
@@ -235,40 +233,11 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
 
 <div class="toast" id="toast"></div>
 <div class="bottom-nav">
-  <button class="nav-btn active" onclick="goTo('page-menu')">🏠<span id="nav-home">الرئيسية</span></button>
-  <button class="nav-btn" onclick="goTo('page-cart')">🛒<span id="nav-cart">السلة</span></button>
+  <button class="nav-btn active" onclick="goTo('page-menu')">🏠<span>الرئيسية</span></button>
+  <button class="nav-btn" onclick="goTo('page-cart')">🛒<span>السلة</span></button>
 </div>
 
 <script>
-// ===================== الترجمات =====================
-const translations = {
-  ar: { home:"الرئيسية", cart:"السلة", addMore:"← إضافة المزيد", name:"👤 الاسم", address:"📍 العنوان", table:"🪑 رقم الطاولة (اختياري)", deliveryTime:"⏰ وقت التوصيل (اختياري)", items:"طلباتك", notes:"📝 ملاحظات (اختياري)", itemsCount:"عدد الأصناف", subtotal:"المجموع الفرعي", deliveryFee:"سعر التوصيل", total:"المجموع النهائي", sypCurr:"بالليرة السورية الجديدة", sendWA:"📱 إرسال الطلب عبر واتساب", clearCart:"🗑️ مسح السلة", viewCart:"عرض السلة", adminLogin:"لوحة التحكم", productNotAvailable:"هذا المنتج غير متوفر حالياً", addedToCart:"تمت إضافة المنتج للسلة", orderSent:"تم إرسال الطلب، سيفتح واتساب", emptyCart:"السلة فارغة", enterNameAddress:"الرجاء إدخال الاسم والعنوان" },
-  en: { home:"Home", cart:"Cart", addMore:"← Add more", name:"👤 Name", address:"📍 Address", table:"🪑 Table number (optional)", deliveryTime:"⏰ Delivery time (optional)", items:"Your items", notes:"📝 Notes (optional)", itemsCount:"Items count", subtotal:"Subtotal", deliveryFee:"Delivery fee", total:"Total", sypCurr:"In new Syrian pound", sendWA:"📱 Send order via WhatsApp", clearCart:"🗑️ Clear cart", viewCart:"View cart", adminLogin:"Admin panel", productNotAvailable:"This product is currently unavailable", addedToCart:"Product added to cart", orderSent:"Order sent, WhatsApp will open", emptyCart:"Cart is empty", enterNameAddress:"Please enter name and address" }
-};
-let currentLang = localStorage.getItem('app_lang') || 'ar';
-function t(key) { return translations[currentLang][key] || key; }
-function toggleLanguage() { currentLang = currentLang === 'ar' ? 'en' : 'ar'; localStorage.setItem('app_lang', currentLang); document.body.dir = currentLang === 'ar' ? 'rtl' : 'ltr'; updateAllTexts(); buildMenu(); if(document.getElementById('page-cart').classList.contains('active')) buildCart(); }
-function updateAllTexts(){
-  document.getElementById('nav-home').innerText = t('home');
-  document.getElementById('nav-cart').innerText = t('cart');
-  if(document.getElementById('back-add')) document.getElementById('back-add').innerText = t('addMore');
-  document.getElementById('lbl-name').innerText = t('name');
-  document.getElementById('lbl-address').innerText = t('address');
-  document.getElementById('lbl-table').innerText = t('table');
-  document.getElementById('lbl-delivery-time').innerText = t('deliveryTime');
-  document.getElementById('lbl-items').innerText = t('items');
-  document.getElementById('lbl-notes').innerText = t('notes');
-  document.getElementById('items-count-label').innerText = t('itemsCount');
-  document.getElementById('subtotal-label').innerText = t('subtotal');
-  document.getElementById('delivery-label').innerText = t('deliveryFee');
-  document.getElementById('total-label').innerText = t('total');
-  document.getElementById('syp-label').innerText = t('sypCurr');
-  document.getElementById('send-wa-btn').innerHTML = t('sendWA');
-  document.getElementById('clear-cart-btn').innerHTML = t('clearCart');
-  document.getElementById('float-cart-text').innerText = t('viewCart');
-  document.getElementById('admin-login-title').innerText = t('adminLogin');
-}
-
 // ===================== الإعدادات الافتراضية (فارغة) =====================
 const DEFAULTS = { name:"مطعمي", whatsapp:"963912345678", instagram:"", facebook:"", logo:"", deliveryFee:0, password:"admin123", rates:{ usd:13000, try_rate:380 }, slides:[] };
 let CONFIG = JSON.parse(localStorage.getItem('resto_config')) || JSON.parse(JSON.stringify(DEFAULTS));
@@ -307,9 +276,9 @@ function buildPriceFilterOptions(){
   if(activeCur === 'SYP'){
     options = [['all','كل الأسعار'],['100','حتى 100 ل.س'],['200','حتى 200 ل.س'],['300','حتى 300 ل.س']];
   } else if(activeCur === 'USD'){
-    options = [['all','All'],['1','≤$1'],['2','≤$2'],['3','≤$3']];
+    options = [['all','كل الأسعار'],['1','حتى 1 $'],['2','حتى 2 $'],['3','حتى 3 $']];
   } else {
-    options = [['all','Tüm'],['5','≤5₺'],['10','≤10₺'],['20','≤20₺']];
+    options = [['all','كل الأسعار'],['5','حتى 5 ₺'],['10','حتى 10 ₺'],['20','حتى 20 ₺']];
   }
   filter.innerHTML = options.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('');
 }
@@ -358,7 +327,7 @@ function buildMenu(){
 // فتح مودال المنتج
 function openProductModal(itemId){
   let item = MENU.flatMap(c=>c.items).find(i=>i.id==itemId);
-  if(!item.available){ showToast(t('productNotAvailable')); return; }
+  if(!item.available){ showToast('هذا المنتج غير متوفر حالياً'); return; }
   document.getElementById('product-modal-name').innerText = item.name;
   const imgEl = document.getElementById('product-modal-img');
   imgEl.src = (item.image && item.image.trim() !== '') ? item.image : 'https://via.placeholder.com/400x150?text=No+Image';
@@ -380,7 +349,7 @@ function addToCart(){
   let totalItemPrice = (basePrice + addonsTotal) * qty;
   let cartKey = item.id+'_'+Date.now();
   cart[cartKey] = { id:item.id, name:item.name, image:item.image, qty:qty, addonsSelected:(item.addons||[]).filter((a,i)=>document.getElementById(`addon_${i}`)?.checked).map(a=>a.name), totalPrice:totalItemPrice };
-  saveCart(); buildCart(); updateFloat(); closeProductModal(); showToast(t('addedToCart'));
+  saveCart(); buildCart(); updateFloat(); closeProductModal(); showToast('تمت إضافة المنتج للسلة');
 }
 function closeProductModal(){ document.getElementById('product-modal').classList.remove('active'); }
 
@@ -400,10 +369,10 @@ function clearCart(){ cart={}; saveCart(); buildCart(); updateFloat(); showToast
 
 // إرسال الطلب عبر واتساب
 function sendWhatsApp(){
-  if(Object.keys(cart).length===0){ showToast(t('emptyCart')); return; }
+  if(Object.keys(cart).length===0){ showToast('السلة فارغة'); return; }
   let name = document.getElementById('customer-name').value.trim();
   let address = document.getElementById('customer-address').value.trim();
-  if(!name || !address){ showToast(t('enterNameAddress')); return; }
+  if(!name || !address){ showToast('الرجاء إدخال الاسم والعنوان'); return; }
   let table = document.getElementById('table-number').value;
   let deliveryTime = document.getElementById('delivery-time').value;
   let note = document.getElementById('order-note').value;
@@ -417,7 +386,7 @@ function sendWhatsApp(){
   if(note) msg+=`\n📝 ملاحظة: ${note}`;
   msg+=`\n🕐 ${new Date().toLocaleTimeString('en-GB')}`;
   window.open(`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(msg)}`,'_blank');
-  cart={}; saveCart(); buildCart(); updateFloat(); goTo('page-menu'); showToast(t('orderSent'));
+  cart={}; saveCart(); buildCart(); updateFloat(); goTo('page-menu'); showToast('تم إرسال الطلب، سيفتح واتساب');
 }
 function goTo(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -576,7 +545,6 @@ function loadAddonsForEdit(item){
       </select>
       <button class="btn-sm" onclick="this.parentElement.remove()">حذف</button>
     </div>`;
-    // تعيين العملة الافتراضية إلى SYP (لأن السعر مخزن بـ SYP)
     container.lastElementChild.querySelector('.addon-currency').value = 'SYP';
   });
 }
@@ -684,7 +652,6 @@ document.getElementById('modal-image-url')?.addEventListener('input', function()
 });
 
 // بدء التشغيل
-updateAllTexts();
 buildMenu();
 </script>
 </body>
