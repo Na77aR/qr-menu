@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>مطعم الجسري - نظام طلب متكامل</title>
+<title>نظام طلب المطعم</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
@@ -82,7 +82,6 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
 .gallery-img-card{position:relative;width:80px;height:80px;border-radius:12px;overflow:hidden;border:1px solid var(--gold);}
 .gallery-img-card img{width:100%;height:100%;object-fit:cover;}
 .remove-img{position:absolute;top:2px;right:2px;background:black;color:red;border-radius:20px;width:20px;height:20px;font-size:12px;cursor:pointer;text-align:center;line-height:20px;}
-.variation-option{margin:12px 0;padding:8px;background:#2a2520;border-radius:12px;}
 .addon-item{display:flex;align-items:center;gap:8px;margin:8px 0;}
 </style>
 </head>
@@ -101,7 +100,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
         <button class="cur-btn" onclick="setCurrency('TRY',this)">₺</button>
       </div>
     </div>
-    <div class="rest-title" id="rest-name-display">مطعم الجسري</div>
+    <div class="rest-title" id="rest-name-display">مطعمي</div>
     <div class="social-links" id="social-links-container"></div>
   </div>
   <div class="hero-slider" id="hero-slider"></div>
@@ -174,7 +173,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
     <div class="admin-field"><label>فيسبوك</label><input id="cfg-facebook"></div>
     <div class="admin-field"><label>رابط اللوقو</label><input id="cfg-logo"></div>
     <div class="admin-field"><label>رفع لوقو</label><input id="cfg-logo-file" type="file" accept="image/*"></div>
-    <div class="admin-field"><label>سعر التوصيل</label><input id="cfg-delivery" type="number"></div>
+    <div class="admin-field"><label>سعر التوصيل (ل.س جديدة)</label><input id="cfg-delivery" type="number"></div>
     <div class="admin-field"><label>كلمة المرور</label><input id="cfg-password" type="password" placeholder="اتركها لعدم التغيير"></div>
     <button class="btn-primary" onclick="saveConfig()">💾 حفظ الإعدادات</button>
   </div>
@@ -185,7 +184,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
   <div class="admin-section"><div class="admin-section-title">📂 إضافة فئة جديدة</div><div class="admin-field"><label>اسم الفئة</label><input id="new-cat-name"></div><button class="btn-primary" onclick="addCategory()">+ إضافة الفئة</button></div>
 </div>
 
-<!-- مودال إضافة/تعديل صنف مع صورة -->
+<!-- مودال إضافة/تعديل صنف (بدون حجم، فقط إضافات) -->
 <div class="modal-overlay" id="item-modal">
   <div class="modal">
     <h3 id="modal-title">إضافة صنف</h3><input type="hidden" id="modal-item-id">
@@ -198,23 +197,23 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
     <label>اسم الصنف</label><input id="modal-name" class="form-input">
     <label>الوصف</label><input id="modal-desc" class="form-input">
     <label>السعر (ل.س جديدة)</label><input id="modal-price" type="number" class="form-input">
-    <label style="margin-top:10px;">📏 خيارات الحجم (سعر إضافي)</label><div id="variations-container"></div>
-    <button type="button" class="btn-sm" onclick="addVariationField()">+ إضافة حجم</button>
-    <label style="margin-top:10px;">🧂 إضافات (سعر إضافي)</label><div id="addons-container"></div>
+    <label style="margin-top:10px;">🧂 إضافات (سعر إضافي بالليرة السورية الجديدة)</label>
+    <div id="addons-container"></div>
     <button type="button" class="btn-sm" onclick="addAddonField()">+ إضافة إضافة</button>
     <div style="display:flex;gap:10px;margin-top:16px;"><button class="btn-primary" onclick="saveItem()">حفظ</button><button class="btn-secondary" onclick="closeModal()">إلغاء</button></div>
   </div>
 </div>
 
-<!-- مودال اختيار خيارات المنتج -->
+<!-- مودال اختيار الإضافات -->
 <div class="modal-overlay" id="product-modal">
   <div class="modal">
     <h3 id="product-modal-name"></h3>
     <img id="product-modal-img" style="width:100%;height:140px;object-fit:cover;border-radius:16px;margin:10px 0;">
-    <div id="product-modal-desc"></div><div id="product-modal-price"></div>
-    <div id="product-variations"></div><div id="product-addons"></div>
+    <div id="product-modal-desc"></div>
+    <div id="product-modal-price"></div>
+    <div id="product-addons"></div>
     <label>الكمية</label><input type="number" id="product-qty" value="1" min="1" class="form-input">
-    <div style="display:flex;gap:10px;margin-top:16px;"><button class="btn-primary" onclick="addCustomizedToCart()">إضافة للسلة</button><button class="btn-secondary" onclick="closeProductModal()">إلغاء</button></div>
+    <div style="display:flex;gap:10px;margin-top:16px;"><button class="btn-primary" onclick="addToCart()">إضافة للسلة</button><button class="btn-secondary" onclick="closeProductModal()">إلغاء</button></div>
   </div>
 </div>
 
@@ -254,15 +253,13 @@ function updateAllTexts(){
   document.getElementById('admin-login-title').innerText = t('adminLogin');
 }
 
-// ===================== الإعدادات الافتراضية =====================
-const DEFAULTS = { name:"مطعم الجسري", whatsapp:"963912345678", instagram:"", facebook:"", logo:"", deliveryFee:5000, password:"admin123", rates:{ usd:130, try_rate:3.8 }, slides:[] };
+// ===================== الإعدادات الافتراضية (فارغة) =====================
+const DEFAULTS = { name:"مطعمي", whatsapp:"963912345678", instagram:"", facebook:"", logo:"", deliveryFee:5000, password:"admin123", rates:{ usd:130, try_rate:3.8 }, slides:[] };
 let CONFIG = JSON.parse(localStorage.getItem('resto_config')) || JSON.parse(JSON.stringify(DEFAULTS));
 let MENU = JSON.parse(localStorage.getItem('resto_menu')) || [
-  {cat:"🥩 المشاوي", items:[{id:1,name:"شاورما دجاج",price:180,desc:"مع صوص ثوم",image:"",variations:[],addons:[],available:true}]},
-  {cat:"🥗 المقبلات", items:[{id:2,name:"حمص",price:80,desc:"زيت زيتون",image:"",variations:[],addons:[],available:true}]},
-  {cat:"🥤 المشروبات", items:[{id:3,name:"كولا",price:40,desc:"علبة",image:"",variations:[],addons:[],available:true}]}
+  {cat:"الرئيسية", items:[]} // فئة واحدة بدون أي منتجات
 ];
-let nextId = Math.max(...MENU.flatMap(c=>c.items.map(i=>i.id)),100)+1;
+let nextId = 100;
 let cart = JSON.parse(localStorage.getItem('saved_cart')) || {};
 let activeCat = 0, activeCur = 'SYP', currentSlide = 0, slideInterval;
 let nameClickCount = 0;
@@ -336,7 +333,7 @@ function buildMenu(){
   content.innerHTML=''; content.appendChild(pageDiv); updateFloat();
 }
 
-// خيارات المنتج
+// فتح مودال المنتج (مع الإضافات فقط)
 function openProductModal(itemId){
   let item = MENU.flatMap(c=>c.items).find(i=>i.id==itemId);
   if(!item.available){ showToast(t('productNotAvailable')); return; }
@@ -346,25 +343,22 @@ function openProductModal(itemId){
   imgEl.onerror = () => { imgEl.src = 'https://via.placeholder.com/400x150?text=No+Image'; };
   document.getElementById('product-modal-desc').innerText = item.desc;
   document.getElementById('product-modal-price').innerHTML = `<strong>السعر الأساسي:</strong> ${fmt(item.price)}`;
-  let varsDiv = document.getElementById('product-variations'); varsDiv.innerHTML='';
-  (item.variations||[]).forEach((v,idx)=>{ varsDiv.innerHTML+=`<div class="variation-option"><label>${v.name}</label><select id="var_${idx}">${v.options.map(opt=>`<option value="${opt.price}">${opt.name} +${fmt(opt.price)}</option>`).join('')}</select></div>`; });
   let addonsDiv = document.getElementById('product-addons'); addonsDiv.innerHTML='';
   (item.addons||[]).forEach((ad,idx)=>{ addonsDiv.innerHTML+=`<div class="addon-item"><input type="checkbox" id="addon_${idx}" value="${ad.price}"> <label>${ad.name} +${fmt(ad.price)}</label></div>`; });
   document.getElementById('product-qty').value = 1;
   window.currentProductModal = item;
   document.getElementById('product-modal').classList.add('active');
 }
-function addCustomizedToCart(){
+// إضافة للسلة مع الإضافات المختارة
+function addToCart(){
   let item = window.currentProductModal;
   let basePrice = item.price;
-  let variationsTotal = 0;
-  for(let i=0;i<(item.variations||[]).length;i++){ let sel = document.getElementById(`var_${i}`); if(sel) variationsTotal += parseInt(sel.value); }
   let addonsTotal = 0;
   for(let i=0;i<(item.addons||[]).length;i++){ let chk = document.getElementById(`addon_${i}`); if(chk && chk.checked) addonsTotal += parseInt(chk.value); }
   let qty = parseInt(document.getElementById('product-qty').value);
-  let totalItemPrice = (basePrice + variationsTotal + addonsTotal) * qty;
+  let totalItemPrice = (basePrice + addonsTotal) * qty;
   let cartKey = item.id+'_'+Date.now();
-  cart[cartKey] = { id:item.id, name:item.name, image:item.image, qty:qty, variationsSelected:(item.variations||[]).map((v,i)=>({name:v.name,option:document.getElementById(`var_${i}`)?.options[document.getElementById(`var_${i}`).selectedIndex]?.text})), addonsSelected:(item.addons||[]).filter((a,i)=>document.getElementById(`addon_${i}`)?.checked).map(a=>a.name), totalPrice:totalItemPrice };
+  cart[cartKey] = { id:item.id, name:item.name, image:item.image, qty:qty, addonsSelected:(item.addons||[]).filter((a,i)=>document.getElementById(`addon_${i}`)?.checked).map(a=>a.name), totalPrice:totalItemPrice };
   saveCart(); buildCart(); updateFloat(); closeProductModal(); showToast(t('addedToCart'));
 }
 function closeProductModal(){ document.getElementById('product-modal').classList.remove('active'); }
@@ -372,7 +366,7 @@ function closeProductModal(){ document.getElementById('product-modal').classList
 // بناء السلة
 function buildCart(){
   let list=document.getElementById('cart-items-list'); let subtotal=0; list.innerHTML='';
-  Object.values(cart).forEach(citem=>{ subtotal += citem.totalPrice; list.innerHTML+=`<div class="cart-item"><img class="cart-item-img" src="${citem.image || 'https://via.placeholder.com/50'}" onerror="this.src='https://via.placeholder.com/50'"><div style="flex:1;"><div><strong>${citem.name}</strong> x${citem.qty}</div><div style="font-size:11px;">${citem.variationsSelected?.map(v=>v.option).join(', ')} ${citem.addonsSelected?.join(', ')}</div><div>${fmt(citem.totalPrice)}</div></div><button class="btn-danger" onclick="removeCartItem('${Object.keys(cart).find(k=>cart[k]===citem)}')">حذف</button></div>`; });
+  Object.values(cart).forEach(citem=>{ subtotal += citem.totalPrice; list.innerHTML+=`<div class="cart-item"><img class="cart-item-img" src="${citem.image || 'https://via.placeholder.com/50'}" onerror="this.src='https://via.placeholder.com/50'"><div style="flex:1;"><div><strong>${citem.name}</strong> x${citem.qty}</div><div style="font-size:11px;">${citem.addonsSelected?.join(', ')}</div><div>${fmt(citem.totalPrice)}</div></div><button class="btn-danger" onclick="removeCartItem('${Object.keys(cart).find(k=>cart[k]===citem)}')">حذف</button></div>`; });
   let delivery = CONFIG.deliveryFee || 0; let total = subtotal + delivery;
   document.getElementById('cart-kinds').innerText = Object.keys(cart).length;
   document.getElementById('cart-subtotal').innerText = fmt(subtotal);
@@ -383,7 +377,7 @@ function buildCart(){
 function removeCartItem(key){ delete cart[key]; saveCart(); buildCart(); updateFloat(); }
 function clearCart(){ cart={}; saveCart(); buildCart(); updateFloat(); showToast('تم مسح السلة'); }
 
-// واتساب
+// إرسال الطلب عبر واتساب
 function sendWhatsApp(){
   if(Object.keys(cart).length===0){ showToast(t('emptyCart')); return; }
   let name = document.getElementById('customer-name').value.trim();
@@ -396,7 +390,7 @@ function sendWhatsApp(){
   let delivery = CONFIG.deliveryFee;
   let total = subtotal + delivery;
   let msg = `🍽️ *طلب جديد من ${name} - ${CONFIG.name}*\n📍 *العنوان:* ${address}\n${table?`🪑 *طاولة:* ${table}\n`:''}${deliveryTime?`⏰ *وقت التوصيل:* ${new Date(deliveryTime).toLocaleString()}\n`:''}━━━━━━━━━━━━━\n`;
-  Object.values(cart).forEach(i=>{ msg+=`• ${i.name} x${i.qty}`; if(i.variationsSelected?.length) msg+=` (${i.variationsSelected.map(v=>v.option).join(', ')})`; if(i.addonsSelected?.length) msg+=` +${i.addonsSelected.join(',+')}`; msg+=` = *${fmtSYP(i.totalPrice)}*\n`; });
+  Object.values(cart).forEach(i=>{ msg+=`• ${i.name} x${i.qty}`; if(i.addonsSelected?.length) msg+=` +${i.addonsSelected.join(',+')}`; msg+=` = *${fmtSYP(i.totalPrice)}*\n`; });
   msg+=`━━━━━━━━━━━━━\n💰 *المجموع الفرعي:* ${fmtSYP(subtotal)}\n🚚 *التوصيل:* ${fmtSYP(delivery)}\n💵 *المجموع:* ${fmtSYP(total)}`;
   if(activeCur!=='SYP') msg+=` ≈ ${fmt(total)}`;
   if(note) msg+=`\n📝 ملاحظة: ${note}`;
@@ -447,7 +441,7 @@ function loadAdminPanel(){
   MENU.forEach((cat,ci)=>{
     listDiv.innerHTML += `<div style="background:#1f1c18;padding:8px;display:flex;justify-content:space-between;"><span>${cat.cat}</span><button class="btn-danger" onclick="deleteCat(${ci})">حذف الفئة</button></div>`;
     cat.items.forEach(item=>{
-      listDiv.innerHTML += `<div class="admin-item"><img class="admin-item-img" src="${item.image || 'https://via.placeholder.com/40'}" onerror="this.src='https://via.placeholder.com/40'"><div style="flex:1;"><div><strong>${item.name}</strong></div><div>${fmtSYP(item.price)}</div><div>${item.available?'✅ متوفر':'❌ غير متوفر'}</div><div style="font-size:10px;">${item.variations?.length||0} حجم, ${item.addons?.length||0} إضافة</div></div><button class="btn-sm" onclick="openEditItem(${item.id})">تعديل</button><button class="btn-danger" onclick="deleteItem(${item.id})">حذف</button><button class="btn-sm" onclick="toggleAvailability(${item.id})">تبديل</button></div>`;
+      listDiv.innerHTML += `<div class="admin-item"><img class="admin-item-img" src="${item.image || 'https://via.placeholder.com/40'}" onerror="this.src='https://via.placeholder.com/40'"><div style="flex:1;"><div><strong>${item.name}</strong></div><div>${fmtSYP(item.price)}</div><div>${item.available?'✅ متوفر':'❌ غير متوفر'}</div><div style="font-size:10px;">${item.addons?.length||0} إضافة</div></div><button class="btn-sm" onclick="openEditItem(${item.id})">تعديل</button><button class="btn-danger" onclick="deleteItem(${item.id})">حذف</button><button class="btn-sm" onclick="toggleAvailability(${item.id})">تبديل</button></div>`;
     });
   });
   buildGalleryPreview();
@@ -521,42 +515,14 @@ function deleteItem(id){
   for(let cat of MENU) cat.items = cat.items.filter(i=>i.id!==id);
   saveData(); buildMenu(); loadAdminPanel(); showToast('✅ تم الحذف');
 }
-let variationCounter = 0, addonCounter = 0;
-function addVariationField(){
-  let div = document.getElementById('variations-container');
-  div.innerHTML += `<div class="variation-item" style="margin-bottom:10px;padding:8px;background:#2a2520;border-radius:8px;">
-    <input type="text" placeholder="اسم الحجم (مثل: صغير)" class="form-input var-name" style="margin-bottom:5px;">
-    <div class="var-options"></div>
-    <button type="button" class="btn-sm" onclick="addOptionToVariation(this)">+ إضافة خيار (سعر)</button>
-    <button type="button" class="btn-danger" style="margin-top:5px;" onclick="this.parentElement.remove()">حذف الحجم</button>
-  </div>`;
-}
-function addOptionToVariation(btn){
-  let container = btn.parentElement.querySelector('.var-options');
-  container.innerHTML += `<div style="display:flex;gap:5px;margin:5px 0;"><input type="text" placeholder="الاسم (مثل: وسط)" class="form-input opt-name" style="flex:1;"><input type="number" placeholder="سعر إضافي" class="form-input opt-price" style="width:80px;"><button class="btn-sm" onclick="this.parentElement.remove()">✖</button></div>`;
-}
+// دوال الإضافات
 function addAddonField(){
   let div = document.getElementById('addons-container');
   div.innerHTML += `<div class="addon-item" style="display:flex;gap:5px;margin-bottom:5px;">
     <input type="text" placeholder="اسم الإضافة (جبنة)" class="form-input addon-name" style="flex:1;">
-    <input type="number" placeholder="سعر إضافي" class="form-input addon-price" style="width:100px;">
+    <input type="number" placeholder="سعر إضافي (ل.س جديدة)" class="form-input addon-price" style="width:100px;">
     <button class="btn-sm" onclick="this.parentElement.remove()">حذف</button>
   </div>`;
-}
-function collectVariationsFromUI(){
-  let variations = [];
-  document.querySelectorAll('#variations-container .variation-item').forEach(item => {
-    let name = item.querySelector('.var-name')?.value.trim();
-    if(!name) return;
-    let options = [];
-    item.querySelectorAll('.var-options > div').forEach(optDiv => {
-      let optName = optDiv.querySelector('.opt-name')?.value.trim();
-      let optPrice = parseInt(optDiv.querySelector('.opt-price')?.value) || 0;
-      if(optName) options.push({ name: optName, price: optPrice });
-    });
-    if(options.length) variations.push({ name, options });
-  });
-  return variations;
 }
 function collectAddonsFromUI(){
   let addons = [];
@@ -567,26 +533,11 @@ function collectAddonsFromUI(){
   });
   return addons;
 }
-function loadVariationsAndAddonsForEdit(item){
-  let varsContainer = document.getElementById('variations-container');
-  let addonsContainer = document.getElementById('addons-container');
-  varsContainer.innerHTML = '';
-  addonsContainer.innerHTML = '';
-  (item.variations||[]).forEach(v => {
-    varsContainer.innerHTML += `<div class="variation-item" style="margin-bottom:10px;padding:8px;background:#2a2520;border-radius:8px;">
-      <input type="text" placeholder="اسم الحجم" class="form-input var-name" value="${v.name}" style="margin-bottom:5px;">
-      <div class="var-options"></div>
-      <button type="button" class="btn-sm" onclick="addOptionToVariation(this)">+ إضافة خيار (سعر)</button>
-      <button type="button" class="btn-danger" style="margin-top:5px;" onclick="this.parentElement.remove()">حذف الحجم</button>
-    </div>`;
-    let lastItem = varsContainer.lastElementChild;
-    let optsContainer = lastItem.querySelector('.var-options');
-    v.options.forEach(opt => {
-      optsContainer.innerHTML += `<div style="display:flex;gap:5px;margin:5px 0;"><input type="text" placeholder="الاسم" class="form-input opt-name" value="${opt.name}" style="flex:1;"><input type="number" placeholder="سعر إضافي" class="form-input opt-price" value="${opt.price}" style="width:80px;"><button class="btn-sm" onclick="this.parentElement.remove()">✖</button></div>`;
-    });
-  });
+function loadAddonsForEdit(item){
+  let container = document.getElementById('addons-container');
+  container.innerHTML = '';
   (item.addons||[]).forEach(ad => {
-    addonsContainer.innerHTML += `<div class="addon-item" style="display:flex;gap:5px;margin-bottom:5px;">
+    container.innerHTML += `<div class="addon-item" style="display:flex;gap:5px;margin-bottom:5px;">
       <input type="text" placeholder="اسم الإضافة" class="form-input addon-name" value="${ad.name}" style="flex:1;">
       <input type="number" placeholder="سعر إضافي" class="form-input addon-price" value="${ad.price}" style="width:100px;">
       <button class="btn-sm" onclick="this.parentElement.remove()">حذف</button>
@@ -602,9 +553,7 @@ function openAddItem(){
   document.getElementById('modal-image-file').value = '';
   document.getElementById('modal-image-url').value = '';
   document.getElementById('image-preview').style.display = 'none';
-  document.getElementById('variations-container').innerHTML = '';
   document.getElementById('addons-container').innerHTML = '';
-  variationCounter = 0; addonCounter = 0;
   let sel = document.getElementById('modal-cat');
   sel.innerHTML = MENU.map((c,i)=>`<option value="${i}">${c.cat}</option>`).join('');
   document.getElementById('item-modal').classList.add('active');
@@ -626,7 +575,7 @@ function openEditItem(id){
   } else {
     previewDiv.style.display = 'none';
   }
-  loadVariationsAndAddonsForEdit(item);
+  loadAddonsForEdit(item);
   let sel = document.getElementById('modal-cat');
   sel.innerHTML = MENU.map((c,i)=>`<option value="${i}" ${i===ci?'selected':''}>${c.cat}</option>`).join('');
   document.getElementById('item-modal').classList.add('active');
@@ -639,7 +588,6 @@ function saveItem(){
   let price = parseInt(document.getElementById('modal-price').value);
   let imageUrl = document.getElementById('modal-image-url').value.trim();
   let imageFile = document.getElementById('modal-image-file').files[0];
-  let variations = collectVariationsFromUI();
   let addons = collectAddonsFromUI();
   if(!name || isNaN(price)){ showToast('❌ الاسم والسعر مطلوبان'); return; }
   let finalImage = imageUrl;
@@ -647,24 +595,24 @@ function saveItem(){
     const reader = new FileReader();
     reader.onload = e => {
       finalImage = e.target.result;
-      saveItemData(id, catIdx, name, desc, price, finalImage, variations, addons);
+      saveItemData(id, catIdx, name, desc, price, finalImage, addons);
     };
     reader.readAsDataURL(imageFile);
     return;
   }
-  saveItemData(id, catIdx, name, desc, price, finalImage, variations, addons);
+  saveItemData(id, catIdx, name, desc, price, finalImage, addons);
 }
-function saveItemData(id, catIdx, name, desc, price, image, variations, addons){
+function saveItemData(id, catIdx, name, desc, price, image, addons){
   if(id){
     let item = MENU.flatMap(c=>c.items).find(i=>i.id==id);
     if(item){
       item.name = name; item.desc = desc; item.price = price; item.image = image;
-      item.variations = variations; item.addons = addons;
+      item.addons = addons;
       saveData(); loadAdminPanel(); buildMenu();
     }
   } else {
     let newId = nextId++;
-    MENU[catIdx].items.push({ id:newId, name, desc, price, image, variations, addons, available:true });
+    MENU[catIdx].items.push({ id:newId, name, desc, price, image, addons, available:true });
     saveData(); loadAdminPanel(); buildMenu();
   }
   closeModal(); showToast('✅ تم الحفظ');
