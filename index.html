@@ -270,11 +270,20 @@ async function saveConfigToFirebase() {
   console.log("✅ Config saved to Firebase");
 }
 async function saveMenuToFirebase() {
-  const menuRef = collection(db, "menu");
-  const snapshot = await getDocs(menuRef);
-  for(const docSnap of snapshot.docs) await deleteDoc(docSnap.ref);
-  for(let catObj of MENU) await addDoc(menuRef, catObj);
-  console.log("✅ Menu saved to Firebase");
+  try {
+    const menuRef = collection(db, "menu");
+    const snapshot = await getDocs(menuRef);
+    for (const docSnap of snapshot.docs) {
+      await deleteDoc(docSnap.ref);
+    }
+    for (let catObj of MENU) {
+      await addDoc(menuRef, catObj);
+    }
+    console.log("Menu saved successfully");
+  } catch (err) {
+    console.error("saveMenuToFirebase error:", err);
+    throw err;
+  }
 }
 async function saveOrderToFirebase(order) {
   const ordersRef = collection(db, "orders");
@@ -668,25 +677,33 @@ async function removeGalleryImage(idx){
   buildSlider();
   buildGalleryPreview();
 }
-async function addCategory(){
-  let name = document.getElementById('new-cat-name').value.trim();
-  if(!name){ showToast('❌ أدخل اسم الفئة'); return; }
-  let imageFile = document.getElementById('new-cat-image').files[0];
+async function addCategory() {
+  const name = document.getElementById('new-cat-name').value.trim();
+  if (!name) { showToast('❌ أدخل اسم الفئة'); return; }
+  const imageFile = document.getElementById('new-cat-image').files[0];
   let catImage = '';
-  if(imageFile){
-    const storageRef = ref(storage, `categories/${Date.now()}_${imageFile.name}`);
-    await uploadBytes(storageRef, imageFile);
-    catImage = await getDownloadURL(storageRef);
+  if (imageFile) {
+    try {
+      const storageRef = ref(storage, `categories/${Date.now()}_${imageFile.name}`);
+      await uploadBytes(storageRef, imageFile);
+      catImage = await getDownloadURL(storageRef);
+      console.log("Category image uploaded:", catImage);
+    } catch (err) {
+      console.error("Upload error:", err);
+      showToast('فشل رفع الصورة، تمت الإضافة بدون صورة');
+    }
   }
-  MENU.push({cat: name, image: catImage, items: []});
+  MENU.push({ cat: name, image: catImage, items: [] });
   await saveMenuToFirebase();
   loadAdminPanel();
   document.getElementById('new-cat-name').value = '';
   document.getElementById('new-cat-image').value = '';
-  document.getElementById('new-cat-preview').style.display = 'none';
+  const preview = document.getElementById('new-cat-preview');
+  if (preview) preview.style.display = 'none';
   buildMenu();
   showToast('✅ تمت إضافة الفئة');
 }
+
 async function deleteCat(ci){
   if(!confirm('حذف هذه الفئة وكل عناصرها؟')) return;
   MENU.splice(ci,1);
@@ -760,7 +777,7 @@ function openEditItem(id){
   sel.innerHTML = MENU.map((c,i)=>`<option value="${i}" ${i===ci?'selected':''}>${c.cat}</option>`).join('');
   document.getElementById('item-modal').classList.add('active');
 }
-async function saveItem(){
+async function saveItem() {
   let id = document.getElementById('modal-item-id').value;
   let catIdx = parseInt(document.getElementById('modal-cat').value);
   let name = document.getElementById('modal-name').value.trim();
@@ -771,27 +788,44 @@ async function saveItem(){
   let imageUrl = document.getElementById('modal-image-url').value.trim();
   let imageFile = document.getElementById('modal-image-file').files[0];
   let addons = collectAddonsFromUI();
-  if(!name || priceSYP<=0){ showToast('❌ الاسم والسعر مطلوبان'); return; }
+
+  if (!name || priceSYP <= 0) { showToast('❌ الاسم والسعر مطلوبان'); return; }
+
   let finalImage = imageUrl;
-  if(imageFile){
-    const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
-    await uploadBytes(storageRef, imageFile);
-    finalImage = await getDownloadURL(storageRef);
+  if (imageFile) {
+    try {
+      const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
+      await uploadBytes(storageRef, imageFile);
+      finalImage = await getDownloadURL(storageRef);
+    } catch (err) {
+      console.error("Image upload error:", err);
+      showToast('فشل رفع الصورة، سيتم حفظ المنتج بدون صورة');
+    }
   }
-  if(id){
-    let item = MENU.flatMap(c=>c.items).find(i=>i.id==id);
-    if(item){
+
+  if (id) {
+    let item = MENU.flatMap(c => c.items).find(i => i.id == id);
+    if (item) {
       item.name = name; item.desc = desc; item.price = priceSYP; item.image = finalImage; item.addons = addons;
+    } else {
+      showToast('❌ المنتج غير موجود');
+      return;
     }
   } else {
     let newId = Date.now();
-    MENU[catIdx].items.push({ id:newId, name, desc, price:priceSYP, image:finalImage, addons, available:true });
+    MENU[catIdx].items.push({ id: newId, name, desc, price: priceSYP, image: finalImage, addons, available: true });
   }
-  await saveMenuToFirebase();
-  loadAdminPanel();
-  buildMenu();
-  closeModal();
-  showToast('✅ تم الحفظ');
+
+  try {
+    await saveMenuToFirebase();
+    loadAdminPanel();
+    buildMenu();
+    closeModal();
+    showToast('✅ تم الحفظ');
+  } catch (err) {
+    console.error("Firestore save error:", err);
+    showToast('❌ فشل الحفظ في قاعدة البيانات');
+  }
 }
 function closeModal(){ document.getElementById('item-modal').classList.remove('active'); }
 
