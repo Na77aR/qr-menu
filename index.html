@@ -3,11 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>نظام طلب المطعم - سحابي متكامل (Supabase)</title>
+<!-- حل مشكلة CSP (السماح بـ unsafe-eval لـ Supabase SDK) -->
+<meta http-equiv="Content-Security-Policy" content="script-src 'unsafe-eval' 'unsafe-inline' https://cdn.jsdelivr.net 'self';">
+<title>نظام طلب المطعم - Supabase</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
-/* نفس الأنماط السابقة (لم تتغير) */
+/* جميع الأنماط السابقة (نفسها) */
 :root{--gold:#c8963e;--gold-light:#e8b86d;--bg:#0f0e0d;--bg2:#1a1814;--bg3:#1e1c18;--border:#2e2b24;--text:#f5f0e8;--muted:#a09080;--dim:#7a7060;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direction:rtl;}
@@ -178,7 +180,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
   </div>
 
   <div class="admin-section"><div class="admin-section-title">📋 الطلبات المسجلة</div>
-    <div style="padding:12px;overflow-x:auto;"><table class="orders-table" id="orders-table"><thead> <th>#</th><th>العميل</th><th>المبلغ</th><th>التاريخ</th><th>طباعة</th> </thead><tbody id="orders-list"></tbody> </table></div>
+    <div style="padding:12px;overflow-x:auto;"><table class="orders-table" id="orders-table"><thead> <th>#</th><th>العميل</th><th>المبلغ</th><th>التاريخ</th><th>طباعة</th> </thead><tbody id="orders-list"></tbody> <tr></div>
   </div>
 
   <div class="admin-section"><div class="admin-section-title">💱 أسعار الصرف</div>
@@ -224,28 +226,30 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ------------------- Supabase Configuration -------------------
-// ⚠️ استبدل هذه القيم بالقيم التي حصلت عليها من مشروع Supabase الخاص بك
-const SUPABASE_URL = "https://dasxvibcodvzisqbzzgw.supabase.co/rest/v1/";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhc3h2aWJjb2R2emlzcWJ6emd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNTkyODIsImV4cCI6MjA5NTYzNTI4Mn0.TWivD2fMFmxTf9mQj_jp6g5fksXaxgX0-evOFxCRWhk";
+// ===================== إعدادات Supabase (استبدل بالقيم الصحيحة) =====================
+const SUPABASE_URL = "https://dasxvibcodvzisqbzzgw.supabase.co/rest/v1/";      // مثال: https://xxxxx.supabase.co
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhc3h2aWJjb2R2emlzcWJ6emd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNTkyODIsImV4cCI6MjA5NTYzNTI4Mn0.TWivD2fMFmxTf9mQj_jp6g5fksXaxgX0-evOFxCRWhk";    // المفتاح العام المجهول
 
-// تهيئة Supabase
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// تجنب التصريح المتكرر: نتحقق إن لم يكن معرفاً مسبقاً
+if (typeof window._supabaseInitialized === 'undefined') {
+  window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  window._supabaseInitialized = true;
+}
+const supabase = window.supabaseClient;
 
-// تحديد معرف المطعم (يمكن تغييره لكل مطعم)
-// في حالة البيع لأكثر من مطعم، يمكنك جعل هذا المعرف فريداً لكل عميل
+// معرف المطعم (يمكن تخصيصه لكل مطعم على حدة)
 const RESTAURANT_ID = "restaurant_main";
 
-// ------------------- Global Variables -------------------
+// ===================== المتغيرات العامة =====================
 let CONFIG = { name:"مطعمي", whatsapp:"963912345678", instagram:"", facebook:"", logo:"", deliveryFee:0, password:"admin123", rates:{ usd:13000, try_rate:380 }, slides:[] };
-let MENU = []; // سيتم ملؤه من قاعدة البيانات
+let MENU = [];
 let ORDERS = [];
 let cart = JSON.parse(localStorage.getItem('saved_cart') || '{}');
 let activeCat = 0, activeCur = 'SYP', nameClickCount = 0;
 let currentProductModal = null;
 let currentOrderMethod = "dinein";
 
-// ------------------- Helper Functions -------------------
+// ===================== الدوال المساعدة =====================
 function sypTo(amount,cur){ let r=CONFIG.rates; if(cur==='USD') return (amount/r.usd).toFixed(2); if(cur==='TRY') return (amount/r.try_rate).toFixed(1); return amount.toLocaleString(); }
 function curSymbol(cur){ return cur==='USD'?'$':cur==='TRY'?'₺':'ل.س جديدة'; }
 function fmt(priceSYP){ return sypTo(priceSYP,activeCur)+' '+curSymbol(activeCur); }
@@ -257,7 +261,7 @@ function getTotal(){ return Object.values(cart).reduce((s,i)=>s+i.totalPrice,0);
 function getTotalItems(){ return Object.values(cart).reduce((s,i)=>s+i.qty,0); }
 function updateFloat(){ let t=getTotalItems(), btn=document.getElementById('float-cart'); btn.style.display=t>0?'flex':'none'; document.getElementById('cart-count').innerText=t; document.getElementById('cart-total-float').innerText=fmt(getTotal()); }
 
-// ------------------- Supabase Load/Save -------------------
+// ===================== تحميل وحفظ البيانات من/إلى Supabase =====================
 async function loadConfig() {
   const { data, error } = await supabase
     .from('config')
@@ -278,7 +282,7 @@ async function loadConfig() {
       slides: data.slides || []
     };
   } else {
-    // إنشاء سجل افتراضي إذا لم يكن موجوداً
+    // إنشاء سجل افتراضي
     await supabase.from('config').insert([{
       restaurant_id: RESTAURANT_ID,
       name: CONFIG.name,
@@ -334,7 +338,6 @@ async function loadMenu() {
 }
 
 async function saveMenuToSupabase() {
-  // حذف السجلات القديمة ثم إدراج الجديدة (للتزامن البسيط)
   await supabase.from('menu').delete().eq('restaurant_id', RESTAURANT_ID);
   if (MENU.length) {
     const toInsert = MENU.map(catObj => ({
@@ -376,10 +379,10 @@ async function saveOrderToSupabase(order) {
     date: order.date,
     date_time: order.dateTime
   });
-  loadOrders(); // تحديث الواجهة بعد الحفظ
+  loadOrders();
 }
 
-// ------------------- Stats & Orders -------------------
+// ===================== الإحصائيات والطلبات =====================
 function updateStats(){
   let today = new Date().toLocaleDateString('en-CA');
   let todayOrders = ORDERS.filter(o => o.date === today);
@@ -401,7 +404,7 @@ window.printOrder = function(order){
   w.document.close();
 };
 
-// ------------------- UI Building -------------------
+// ===================== بناء واجهة المستخدم =====================
 function buildPriceFilterOptions(){
   let filter = document.getElementById('price-filter');
   if(!filter) return;
@@ -453,7 +456,7 @@ function buildMenu(){
   content.innerHTML = ''; content.appendChild(pageDiv); updateFloat();
 }
 
-// ------------------- Cart & Product Modal -------------------
+// ===================== دوال السلة والمنتج =====================
 function openProductModal(itemId){
   let item = MENU.flatMap(c=>c.items).find(i=>i.id==itemId);
   if(!item.available){ showToast('هذا المنتج غير متوفر حالياً'); return; }
@@ -503,7 +506,7 @@ function removeCartItem(key){ delete cart[key]; saveCartToLocal(); buildCart(); 
 function clearCart(){ cart={}; saveCartToLocal(); buildCart(); updateFloat(); showToast('تم مسح السلة'); }
 function saveCartToLocal(){ localStorage.setItem('saved_cart', JSON.stringify(cart)); }
 
-// ------------------- Order Method & WhatsApp -------------------
+// ===================== طريقة الطلب وواتساب =====================
 function selectOrderMethod(method){
   currentOrderMethod = method;
   document.querySelectorAll('.method-btn').forEach(btn => {
@@ -567,7 +570,7 @@ function goTo(id){
   window.scrollTo(0,0);
 }
 
-// ------------------- Admin Panel -------------------
+// ===================== لوحة الأدمن =====================
 function checkAdminPass(){
   if(document.getElementById('admin-pass').value === CONFIG.password){
     document.getElementById('pass-error').style.display='none';
@@ -814,7 +817,7 @@ async function finishSaveItem(id, catIdx, name, desc, price, image, addons){
 }
 function closeModal(){ document.getElementById('item-modal').classList.remove('active'); }
 
-// Preview for category image
+// ===================== معاينة الصور =====================
 document.getElementById('new-cat-image')?.addEventListener('change', function(e){
   const file = e.target.files[0];
   if(file){
@@ -827,7 +830,6 @@ document.getElementById('new-cat-image')?.addEventListener('change', function(e)
     reader.readAsDataURL(file);
   }
 });
-// Preview for logo
 document.getElementById('cfg-logo-file')?.addEventListener('change', function(e){
   const file = e.target.files[0];
   if(file){
@@ -841,11 +843,12 @@ document.getElementById('cfg-logo-file')?.addEventListener('change', function(e)
   }
 });
 
-// ------------------- Initialization -------------------
+// ===================== بدء التطبيق =====================
 selectOrderMethod('dinein');
 loadConfig().then(() => loadMenu());
 loadOrders();
-// Make functions global
+
+// ربط الدوال العامة
 window.setCurrency = setCurrency;
 window.goTo = goTo;
 window.checkAdminPass = checkAdminPass;
