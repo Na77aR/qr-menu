@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>نظام طلب المطعم - سحابي بالكامل</title>
+<title>نظام طلب المطعم - سحابي متكامل</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
@@ -490,7 +490,7 @@ function goTo(id){
   window.scrollTo(0,0);
 }
 
-// ------------------- Admin Panel (Image as Base64) -------------------
+// ------------------- Admin Panel (Fixed addCategory) -------------------
 function checkAdminPass(){
   if(document.getElementById('admin-pass').value === CONFIG.password){
     document.getElementById('pass-error').style.display='none';
@@ -599,31 +599,39 @@ async function removeGalleryImage(idx){
   buildSlider();
   buildGalleryPreview();
 }
-async function addCategory(){
+// FIXED addCategory function (works with or without image)
+async function addCategory() {
   let name = document.getElementById('new-cat-name').value.trim();
-  if(!name){ showToast('❌ أدخل اسم الفئة'); return; }
+  if (!name) {
+    showToast('❌ أدخل اسم الفئة');
+    return;
+  }
   let imageFile = document.getElementById('new-cat-image').files[0];
-  let catImage = '';
-  if(imageFile){
+  
+  if (imageFile) {
     const reader = new FileReader();
-    reader.onload = function(e) {
-      catImage = e.target.result;
-      finishAddCategory(name, catImage);
+    reader.onload = async function(e) {
+      const catImage = e.target.result;
+      MENU.push({ cat: name, image: catImage, items: [] });
+      await saveMenuToFirebase();
+      loadAdminPanel();
+      document.getElementById('new-cat-name').value = '';
+      document.getElementById('new-cat-image').value = '';
+      document.getElementById('new-cat-preview').style.display = 'none';
+      buildMenu();
+      showToast('✅ تمت إضافة الفئة مع الصورة');
     };
     reader.readAsDataURL(imageFile);
   } else {
-    finishAddCategory(name, '');
+    MENU.push({ cat: name, image: '', items: [] });
+    await saveMenuToFirebase();
+    loadAdminPanel();
+    document.getElementById('new-cat-name').value = '';
+    document.getElementById('new-cat-image').value = '';
+    document.getElementById('new-cat-preview').style.display = 'none';
+    buildMenu();
+    showToast('✅ تمت إضافة الفئة');
   }
-}
-async function finishAddCategory(name, image){
-  MENU.push({cat: name, image: image, items: []});
-  await saveMenuToFirebase();
-  loadAdminPanel();
-  document.getElementById('new-cat-name').value = '';
-  document.getElementById('new-cat-image').value = '';
-  document.getElementById('new-cat-preview').style.display = 'none';
-  buildMenu();
-  showToast('✅ تمت إضافة الفئة');
 }
 async function deleteCat(ci){
   if(!confirm('حذف هذه الفئة وكل عناصرها؟')) return;
