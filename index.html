@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
+/* جميع الأنماط السابقة كما هي (مختصرة للطول، لكن الكود الكامل موجود) */
 :root{--gold:#c8963e;--gold-light:#e8b86d;--bg:#0f0e0d;--bg2:#1a1814;--bg3:#1e1c18;--border:#2e2b24;--text:#f5f0e8;--muted:#a09080;--dim:#7a7060;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direction:rtl;}
@@ -177,13 +178,13 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
   </div>
 
   <div class="admin-section"><div class="admin-section-title">📋 الطلبات المسجلة</div>
-    <div style="padding:12px;overflow-x:auto;"><table class="orders-table" id="orders-table"><thead><tr><th>#</th><th>العميل</th><th>المبلغ</th><th>التاريخ</th><th>طباعة</th></tr></thead><tbody id="orders-list"></tbody></table></div>
+    <div style="padding:12px;overflow-x:auto;"><table class="orders-table" id="orders-table"><thead>煎<th>#</th><th>العميل</th><th>المبلغ</th><th>التاريخ</th><th>طباعة</th></tr></thead><tbody id="orders-list"></tbody></table></div>
   </div>
 
   <div class="admin-section"><div class="admin-section-title">💱 أسعار الصرف</div>
     <div class="rate-card" style="padding:12px;"><label>1 دولار = </label><input id="rate-usd" type="number" class="form-input" style="width:130px;"> ل.س جديدة</div>
     <div class="rate-card" style="padding:12px;"><label>1 ليرة تركية = </label><input id="rate-try" type="number" class="form-input" style="width:130px;"> ل.س جديدة</div>
-    <button class="btn-primary" onclick="saveRates()" style="margin:12px;width:calc(100% - 24px);">💾 حفظ أسعار الصرف</button>
+    <button class="btn-primary" onclick="saveRates()">💾 حفظ أسعار الصرف</button>
   </div>
 
   <div class="admin-section"><div class="admin-section-title">🏪 بيانات المطعم</div>
@@ -223,12 +224,12 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
 <div class="bottom-nav"><button class="nav-btn active" onclick="goTo('page-menu')">🏠<span>الرئيسية</span></button><button class="nav-btn" onclick="goTo('page-cart')">🛒<span>السلة</span></button></div>
 
 <script type="module">
-// Firebase imports
+// ------------------- Firebase Imports -------------------
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-// Firebase config (استخدم config الخاص بك)
+// ------------------- Firebase Config -------------------
 const firebaseConfig = {
   apiKey: "AIzaSyCSwKVz-cjS3r0-6i0ahTgzzyF3e1_N-lk",
   authDomain: "qr-menu-3d9a7.firebaseapp.com",
@@ -242,16 +243,16 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// بيانات التطبيق
+// ------------------- Global Variables -------------------
 let CONFIG = { name:"مطعمي", whatsapp:"963912345678", instagram:"", facebook:"", logo:"", deliveryFee:0, password:"admin123", rates:{ usd:13000, try_rate:380 }, slides:[] };
-let MENU = []; // سيتم ملؤه من Firebase
+let MENU = [];
 let ORDERS = [];
 let cart = JSON.parse(localStorage.getItem('saved_cart') || '{}');
 let activeCat = 0, activeCur = 'SYP', nameClickCount = 0;
 let currentProductModal = null;
 let currentOrderMethod = "dinein";
 
-// دوال العملات
+// ------------------- Currency Helpers -------------------
 function sypTo(amount,cur){ let r=CONFIG.rates; if(cur==='USD') return (amount/r.usd).toFixed(2); if(cur==='TRY') return (amount/r.try_rate).toFixed(1); return amount.toLocaleString(); }
 function curSymbol(cur){ return cur==='USD'?'$':cur==='TRY'?'₺':'ل.س جديدة'; }
 function fmt(priceSYP){ return sypTo(priceSYP,activeCur)+' '+curSymbol(activeCur); }
@@ -263,46 +264,33 @@ function getTotal(){ return Object.values(cart).reduce((s,i)=>s+i.totalPrice,0);
 function getTotalItems(){ return Object.values(cart).reduce((s,i)=>s+i.qty,0); }
 function updateFloat(){ let t=getTotalItems(), btn=document.getElementById('float-cart'); btn.style.display=t>0?'flex':'none'; document.getElementById('cart-count').innerText=t; document.getElementById('cart-total-float').innerText=fmt(getTotal()); }
 
-// حفظ البيانات في Firebase
+// ------------------- Firebase Save/Load -------------------
 async function saveConfigToFirebase() {
   const configDoc = doc(db, "restaurant", "config");
   await setDoc(configDoc, CONFIG, { merge: true });
-  console.log("✅ Config saved to Firebase");
+  console.log("✅ Config saved");
 }
 async function saveMenuToFirebase() {
-  try {
-    const menuRef = collection(db, "menu");
-    const snapshot = await getDocs(menuRef);
-    for (const docSnap of snapshot.docs) {
-      await deleteDoc(docSnap.ref);
-    }
-    for (let catObj of MENU) {
-      await addDoc(menuRef, catObj);
-    }
-    console.log("Menu saved successfully");
-  } catch (err) {
-    console.error("saveMenuToFirebase error:", err);
-    throw err;
-  }
+  const menuRef = collection(db, "menu");
+  const snapshot = await getDocs(menuRef);
+  for(const docSnap of snapshot.docs) await deleteDoc(docSnap.ref);
+  for(let catObj of MENU) await addDoc(menuRef, catObj);
+  console.log("✅ Menu saved");
 }
 async function saveOrderToFirebase(order) {
   const ordersRef = collection(db, "orders");
   await addDoc(ordersRef, order);
 }
-
-// تحميل البيانات من Firebase مع الاستماع المباشر
 function loadDataFromFirebase() {
   const configDoc = doc(db, "restaurant", "config");
   onSnapshot(configDoc, (snap) => {
     if(snap.exists()) CONFIG = snap.data();
     else setDoc(configDoc, CONFIG);
     document.getElementById('rest-name-display').innerText = CONFIG.name;
-    buildRatesBanner();
-    buildPriceFilterOptions();
+    buildRatesBanner(); buildPriceFilterOptions();
     if(document.getElementById('page-menu').classList.contains('active')) buildMenu();
     if(document.getElementById('page-cart').classList.contains('active')) buildCart();
   });
-  
   const menuRef = collection(db, "menu");
   onSnapshot(query(menuRef), (snapshot) => {
     MENU = [];
@@ -311,17 +299,15 @@ function loadDataFromFirebase() {
     buildMenu();
     if(document.getElementById('page-admin').classList.contains('active')) loadAdminPanel();
   });
-  
   const ordersRef = collection(db, "orders");
   onSnapshot(query(ordersRef, orderBy("dateTime", "desc")), (snapshot) => {
     ORDERS = [];
     snapshot.forEach(doc => ORDERS.push(doc.data()));
-    updateStats();
-    loadOrdersTable();
+    updateStats(); loadOrdersTable();
   });
 }
 
-// الإحصائيات والجدول
+// ------------------- Stats & Orders -------------------
 function updateStats(){
   let today = new Date().toLocaleDateString('en-CA');
   let todayOrders = ORDERS.filter(o => o.date === today);
@@ -331,20 +317,19 @@ function updateStats(){
   document.getElementById('total-orders').innerText = ORDERS.length;
 }
 function loadOrdersTable(){
-  let tbody = document.getElementById('orders-list');
-  tbody.innerHTML = '';
+  let tbody = document.getElementById('orders-list'); tbody.innerHTML = '';
   [...ORDERS].reverse().forEach((order, idx) => {
     tbody.innerHTML += `<tr><td>${idx+1}</td><td>${order.customer}</td><td>${order.total.toLocaleString()} ل.س</td><td>${order.date}</td><td><button class="print-btn" onclick='printOrder(${JSON.stringify(order).replace(/'/g, "\\'")})'>🖨️ طباعة</button></td></tr>`;
   });
 }
-window.printOrder = function(order) {
+window.printOrder = function(order){
   let w = window.open('', '_blank');
   let itemsHtml = order.items.map(it => `<li>${it.name} x${it.qty} - ${it.totalPrice.toLocaleString()} ل.س</li>`).join('');
-  w.document.write(`<html dir="rtl"><head><title>طلب ${order.customer}</title><style>body{font-family:sans-serif;padding:20px;}</style></head><body><h2>طلب جديد - ${CONFIG.name}</h2><p><strong>العميل:</strong> ${order.customer}</p><p><strong>العنوان:</strong> ${order.address}</p><p><strong>طريقة الطلب:</strong> ${order.method || 'غير محدد'}</p>${order.table?`<p><strong>طاولة:</strong> ${order.table}</p>`:''}${order.deliveryTime?`<p><strong>وقت التوصيل:</strong> ${order.deliveryTime}</p>`:''}${order.pickupTime?`<p><strong>وقت الاستلام:</strong> ${order.pickupTime}</p>`:''}<h3>الطلبات:</h3><ul>${itemsHtml}</ul><p><strong>المجموع الفرعي:</strong> ${order.subtotal.toLocaleString()} ل.س</p><p><strong>التوصيل:</strong> ${order.delivery.toLocaleString()} ل.س</p><h3>المجموع النهائي: ${order.total.toLocaleString()} ل.س</h3><button onclick="window.print()">طباعة</button></body></html>`);
+  w.document.write(`<html dir="rtl"><head><title>طلب ${order.customer}</title><style>body{font-family:sans-serif;padding:20px;}</style></head><body><h2>طلب جديد - ${CONFIG.name}</h2><p><strong>العميل:</strong> ${order.customer}</p><p><strong>العنوان:</strong> ${order.address}</p><p><strong>طريقة الطلب:</strong> ${order.method||'غير محدد'}</p>${order.table?`<p><strong>طاولة:</strong> ${order.table}</p>`:''}${order.deliveryTime?`<p><strong>وقت التوصيل:</strong> ${order.deliveryTime}</p>`:''}${order.pickupTime?`<p><strong>وقت الاستلام:</strong> ${order.pickupTime}</p>`:''}<h3>الطلبات:</h3><ul>${itemsHtml}</ul><p><strong>المجموع الفرعي:</strong> ${order.subtotal.toLocaleString()} ل.س</p><p><strong>التوصيل:</strong> ${order.delivery.toLocaleString()} ل.س</p><h3>المجموع النهائي: ${order.total.toLocaleString()} ل.س</h3><button onclick="window.print()">طباعة</button></body></html>`);
   w.document.close();
 };
 
-// بناء واجهة المنيو (مع صور الفئات)
+// ------------------- UI Building -------------------
 function buildPriceFilterOptions(){
   let filter = document.getElementById('price-filter');
   if(!filter) return;
@@ -355,30 +340,11 @@ function buildPriceFilterOptions(){
   filter.innerHTML = opts.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('');
 }
 function buildSlider(){
-  let c = document.getElementById('hero-slider');
-  if(!c) return;
-  c.innerHTML = '';
-  if(!CONFIG.slides || CONFIG.slides.length===0){
-    c.innerHTML = '<div style="background:#2a2520;height:100%;display:flex;align-items:center;justify-content:center;">📸 أضف صوراً للمعرض</div>';
-    return;
-  }
-  CONFIG.slides.forEach((img,i) => {
-    let d = document.createElement('div');
-    d.className = 'hero-slide'+(i===0?' active':'');
-    d.style.backgroundImage = `url('${img}')`;
-    d.innerHTML = '<div class="hero-overlay"></div>';
-    c.appendChild(d);
-  });
+  let c = document.getElementById('hero-slider'); if(!c) return; c.innerHTML='';
+  if(!CONFIG.slides || CONFIG.slides.length===0){ c.innerHTML='<div style="background:#2a2520;height:100%;display:flex;align-items:center;justify-content:center;">📸 أضف صوراً للمعرض</div>'; return; }
+  CONFIG.slides.forEach((img,i)=>{ let d=document.createElement('div'); d.className='hero-slide'+(i===0?' active':''); d.style.backgroundImage=`url('${img}')`; d.innerHTML='<div class="hero-overlay"></div>'; c.appendChild(d); });
   if(window.slideInterval) clearInterval(window.slideInterval);
-  window.slideInterval = setInterval(()=>{
-    let slides = document.querySelectorAll('.hero-slide');
-    if(slides.length){
-      let cur = document.querySelector('.hero-slide.active');
-      let next = cur?.nextElementSibling || slides[0];
-      cur?.classList.remove('active');
-      next?.classList.add('active');
-    }
-  },4000);
+  window.slideInterval = setInterval(()=>{ let s=document.querySelectorAll('.hero-slide'); if(s.length){ let cur=document.querySelector('.hero-slide.active'); let next=cur?.nextElementSibling||s[0]; cur?.classList.remove('active'); next?.classList.add('active'); } },4000);
 }
 function buildRatesBanner(){
   document.getElementById('rates-banner').innerHTML = `<span>💱 أسعار الصرف:</span><span>1$ = <strong>${Number(CONFIG.rates.usd).toLocaleString()} ل.س جديدة</strong></span><span>1₺ = <strong>${Number(CONFIG.rates.try_rate).toLocaleString()} ل.س جديدة</strong></span>`;
@@ -386,28 +352,13 @@ function buildRatesBanner(){
 function buildMenu(){
   document.getElementById('rest-name-display').innerText = CONFIG.name;
   const nameEl = document.getElementById('rest-name-display');
-  nameEl.onclick = (e) => {
-    e.stopPropagation();
-    nameClickCount++;
-    if(nameClickCount>=5){
-      nameClickCount=0;
-      document.getElementById('admin-pass').value='';
-      document.getElementById('pass-error').style.display='none';
-      goTo('page-admin-login');
-    }
-    setTimeout(()=>nameClickCount=0,3000);
-  };
-  let logoBox = document.getElementById('logo-box');
-  logoBox.innerHTML = CONFIG.logo ? `<img src="${CONFIG.logo}">` : '';
-  let socialDiv = document.getElementById('social-links-container');
-  socialDiv.innerHTML = '';
-  if(CONFIG.instagram && CONFIG.instagram.trim() && CONFIG.instagram!=='#')
-    socialDiv.innerHTML += `<a class="social-btn" href="${CONFIG.instagram}" target="_blank">IG</a>`;
-  if(CONFIG.facebook && CONFIG.facebook.trim() && CONFIG.facebook!=='#')
-    socialDiv.innerHTML += `<a class="social-btn" href="${CONFIG.facebook}" target="_blank">f</a>`;
+  nameEl.onclick = (e) => { e.stopPropagation(); nameClickCount++; if(nameClickCount>=5){ nameClickCount=0; document.getElementById('admin-pass').value=''; document.getElementById('pass-error').style.display='none'; goTo('page-admin-login'); } setTimeout(()=>nameClickCount=0,3000); };
+  let logoBox = document.getElementById('logo-box'); logoBox.innerHTML = CONFIG.logo ? `<img src="${CONFIG.logo}">` : '';
+  let socialDiv = document.getElementById('social-links-container'); socialDiv.innerHTML = '';
+  if(CONFIG.instagram && CONFIG.instagram.trim() && CONFIG.instagram!=='#') socialDiv.innerHTML += `<a class="social-btn" href="${CONFIG.instagram}" target="_blank">IG</a>`;
+  if(CONFIG.facebook && CONFIG.facebook.trim() && CONFIG.facebook!=='#') socialDiv.innerHTML += `<a class="social-btn" href="${CONFIG.facebook}" target="_blank">f</a>`;
   buildRatesBanner(); buildSlider(); buildPriceFilterOptions();
-  let bar = document.getElementById('cat-bar');
-  let content = document.getElementById('menu-content');
+  let bar = document.getElementById('cat-bar'); let content = document.getElementById('menu-content');
   bar.innerHTML = '';
   MENU.forEach((cat, ci) => {
     let btn = document.createElement('button');
@@ -419,32 +370,17 @@ function buildMenu(){
   let searchTerm = (document.getElementById('search-input')?.value || '').toLowerCase();
   let maxPrice = document.getElementById('price-filter')?.value;
   let priceLimit = (maxPrice && maxPrice!=='all') ? parseInt(maxPrice) : Infinity;
-  let pageDiv = document.createElement('div');
-  pageDiv.className = 'menu-page';
-  let currentCat = MENU[activeCat] || {cat:"الرئيسية",items:[],image:""};
+  let pageDiv = document.createElement('div'); pageDiv.className = 'menu-page';
+  let currentCat = MENU[activeCat] || {cat:"الرئيسية", items:[], image:""};
   pageDiv.innerHTML = `<div class="section-title">${currentCat.image ? `<img src="${currentCat.image}">` : ''} ${currentCat.cat}</div>`;
   currentCat.items.filter(item => item.name.toLowerCase().includes(searchTerm) && (maxPrice==='all' || item.price<=priceLimit)).forEach(item => {
     const imgSrc = item.image && item.image.trim() ? item.image : 'https://via.placeholder.com/400x150?text=No+Image';
-    pageDiv.innerHTML += `
-      <div class="item-card">
-        <img class="item-img" src="${imgSrc}" onerror="this.src='https://via.placeholder.com/400x150?text=No+Image'">
-        <div class="item-info">
-          <div class="item-name"><span>${item.name}</span><span class="item-price">${fmt(item.price)}</span></div>
-          <div class="item-desc">${item.desc}</div>
-          <div class="item-footer">
-            <button class="btn-order" onclick="openProductModal(${item.id})">🛒 طلب</button>
-            ${!item.available ? '<span class="unavailable-badge">غير متوفر</span>' : ''}
-          </div>
-        </div>
-      </div>
-    `;
+    pageDiv.innerHTML += `<div class="item-card"><img class="item-img" src="${imgSrc}" onerror="this.src='https://via.placeholder.com/400x150?text=No+Image'"><div class="item-info"><div class="item-name"><span>${item.name}</span><span class="item-price">${fmt(item.price)}</span></div><div class="item-desc">${item.desc}</div><div class="item-footer"><button class="btn-order" onclick="openProductModal(${item.id})">🛒 طلب</button>${!item.available?'<span class="unavailable-badge">غير متوفر</span>':''}</div></div></div>`;
   });
-  content.innerHTML = '';
-  content.appendChild(pageDiv);
-  updateFloat();
+  content.innerHTML = ''; content.appendChild(pageDiv); updateFloat();
 }
 
-// دوال السلة والإضافات
+// ------------------- Cart & Product Modal -------------------
 function openProductModal(itemId){
   let item = MENU.flatMap(c=>c.items).find(i=>i.id==itemId);
   if(!item.available){ showToast('هذا المنتج غير متوفر حالياً'); return; }
@@ -454,8 +390,7 @@ function openProductModal(itemId){
   imgEl.onerror = () => { imgEl.src = 'https://via.placeholder.com/400x150?text=No+Image'; };
   document.getElementById('product-modal-desc').innerText = item.desc;
   document.getElementById('product-modal-price').innerHTML = `<strong>السعر الأساسي:</strong> ${fmt(item.price)}`;
-  let addonsDiv = document.getElementById('product-addons');
-  addonsDiv.innerHTML = '';
+  let addonsDiv = document.getElementById('product-addons'); addonsDiv.innerHTML = '';
   (item.addons || []).forEach((ad,idx) => {
     addonsDiv.innerHTML += `<div class="addon-item"><input type="checkbox" id="addon_${idx}" value="${ad.price}"> <label>${ad.name} +${fmt(ad.price)}</label></div>`;
   });
@@ -481,17 +416,7 @@ function buildCart(){
   list.innerHTML = '';
   Object.values(cart).forEach(citem => {
     subtotal += citem.totalPrice;
-    list.innerHTML += `
-      <div class="cart-item">
-        <img class="cart-item-img" src="${citem.image || 'https://via.placeholder.com/50'}" onerror="this.src='https://via.placeholder.com/50'">
-        <div style="flex:1;">
-          <div><strong>${citem.name}</strong> x${citem.qty}</div>
-          <div style="font-size:11px;">${citem.addonsSelected?.join(', ') || ''}</div>
-          <div>${fmt(citem.totalPrice)}</div>
-        </div>
-        <button class="btn-danger" onclick="removeCartItem('${Object.keys(cart).find(k=>cart[k]===citem)}')">حذف</button>
-      </div>
-    `;
+    list.innerHTML += `<div class="cart-item"><img class="cart-item-img" src="${citem.image || 'https://via.placeholder.com/50'}" onerror="this.src='https://via.placeholder.com/50'"><div style="flex:1;"><div><strong>${citem.name}</strong> x${citem.qty}</div><div style="font-size:11px;">${citem.addonsSelected?.join(', ') || ''}</div><div>${fmt(citem.totalPrice)}</div></div><button class="btn-danger" onclick="removeCartItem('${Object.keys(cart).find(k=>cart[k]===citem)}')">حذف</button></div>`;
   });
   let delivery = CONFIG.deliveryFee || 0;
   let total = subtotal + delivery;
@@ -505,7 +430,7 @@ function removeCartItem(key){ delete cart[key]; saveCartToLocal(); buildCart(); 
 function clearCart(){ cart={}; saveCartToLocal(); buildCart(); updateFloat(); showToast('تم مسح السلة'); }
 function saveCartToLocal(){ localStorage.setItem('saved_cart', JSON.stringify(cart)); }
 
-// طريقة الطلب الديناميكية
+// ------------------- Order Method & WhatsApp -------------------
 function selectOrderMethod(method){
   currentOrderMethod = method;
   document.querySelectorAll('.method-btn').forEach(btn => {
@@ -569,7 +494,7 @@ function goTo(id){
   window.scrollTo(0,0);
 }
 
-// دوال الأدمن
+// ------------------- Admin Panel -------------------
 function checkAdminPass(){
   if(document.getElementById('admin-pass').value === CONFIG.password){
     document.getElementById('pass-error').style.display='none';
@@ -594,25 +519,11 @@ function loadAdminPanel(){
   MENU.forEach((cat, ci) => {
     listDiv.innerHTML += `<div style="background:#1f1c18;padding:8px;display:flex;justify-content:space-between;align-items:center;"><div><img src="${cat.image||''}" style="width:30px;height:30px;border-radius:6px;margin-left:5px;"> ${cat.cat}</div><button class="btn-danger" onclick="deleteCat(${ci})">حذف الفئة</button></div>`;
     cat.items.forEach(item => {
-      listDiv.innerHTML += `
-        <div class="admin-item">
-          <img class="admin-item-img" src="${item.image || 'https://via.placeholder.com/40'}" onerror="this.src='https://via.placeholder.com/40'">
-          <div style="flex:1;">
-            <div><strong>${item.name}</strong></div>
-            <div>${fmtSYP(item.price)}</div>
-            <div>${item.available?'✅ متوفر':'❌ غير متوفر'}</div>
-            <div>${item.addons?.length||0} إضافة</div>
-          </div>
-          <button class="btn-sm" onclick="openEditItem(${item.id})">تعديل</button>
-          <button class="btn-danger" onclick="deleteItem(${item.id})">حذف</button>
-          <button class="btn-sm" onclick="toggleAvailability(${item.id})">تبديل</button>
-        </div>
-      `;
+      listDiv.innerHTML += `<div class="admin-item"><img class="admin-item-img" src="${item.image || 'https://via.placeholder.com/40'}" onerror="this.src='https://via.placeholder.com/40'"><div style="flex:1;"><div><strong>${item.name}</strong></div><div>${fmtSYP(item.price)}</div><div>${item.available?'✅ متوفر':'❌ غير متوفر'}</div><div>${item.addons?.length||0} إضافة</div></div><button class="btn-sm" onclick="openEditItem(${item.id})">تعديل</button><button class="btn-danger" onclick="deleteItem(${item.id})">حذف</button><button class="btn-sm" onclick="toggleAvailability(${item.id})">تبديل</button></div>`;
     });
   });
   buildGalleryPreview();
-  updateStats();
-  loadOrdersTable();
+  updateStats(); loadOrdersTable();
 }
 async function toggleAvailability(id){
   let item = MENU.flatMap(c=>c.items).find(i=>i.id==id);
@@ -638,9 +549,12 @@ async function saveConfig(){
   if(newPass) CONFIG.password = newPass;
   let logoFile = document.getElementById('cfg-logo-file').files[0];
   if(logoFile){
-    const storageRef = ref(storage, `logos/${Date.now()}_${logoFile.name}`);
-    await uploadBytes(storageRef, logoFile);
-    CONFIG.logo = await getDownloadURL(storageRef);
+    try {
+      const storageRef = ref(storage, `logos/${Date.now()}_${logoFile.name}`);
+      await uploadBytes(storageRef, logoFile);
+      CONFIG.logo = await getDownloadURL(storageRef);
+      showToast('✅ تم رفع الشعار بنجاح');
+    } catch(e){ showToast('❌ فشل رفع الشعار: '+e.message); }
   }
   await saveConfigToFirebase();
   loadAdminPanel();
@@ -660,16 +574,18 @@ function buildGalleryPreview(){
 async function uploadGalleryImages(){
   let files = document.getElementById('gallery-files').files;
   for(let file of files){
-    const storageRef = ref(storage, `gallery/${Date.now()}_${file.name}`);
-    await uploadBytes(storageRef, file);
-    const url = await getDownloadURL(storageRef);
-    if(!CONFIG.slides) CONFIG.slides = [];
-    CONFIG.slides.push(url);
+    try {
+      const storageRef = ref(storage, `gallery/${Date.now()}_${file.name}`);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      if(!CONFIG.slides) CONFIG.slides = [];
+      CONFIG.slides.push(url);
+      showToast(`✅ تم رفع ${file.name}`);
+    } catch(e){ showToast(`❌ فشل رفع ${file.name}: ${e.message}`); }
   }
   await saveConfigToFirebase();
   buildSlider();
   buildGalleryPreview();
-  showToast('✅ تمت إضافة الصور');
 }
 async function removeGalleryImage(idx){
   CONFIG.slides.splice(idx,1);
@@ -677,33 +593,28 @@ async function removeGalleryImage(idx){
   buildSlider();
   buildGalleryPreview();
 }
-async function addCategory() {
-  const name = document.getElementById('new-cat-name').value.trim();
-  if (!name) { showToast('❌ أدخل اسم الفئة'); return; }
-  const imageFile = document.getElementById('new-cat-image').files[0];
+async function addCategory(){
+  let name = document.getElementById('new-cat-name').value.trim();
+  if(!name){ showToast('❌ أدخل اسم الفئة'); return; }
+  let imageFile = document.getElementById('new-cat-image').files[0];
   let catImage = '';
-  if (imageFile) {
+  if(imageFile){
     try {
       const storageRef = ref(storage, `categories/${Date.now()}_${imageFile.name}`);
       await uploadBytes(storageRef, imageFile);
       catImage = await getDownloadURL(storageRef);
-      console.log("Category image uploaded:", catImage);
-    } catch (err) {
-      console.error("Upload error:", err);
-      showToast('فشل رفع الصورة، تمت الإضافة بدون صورة');
-    }
+      showToast('✅ تم رفع صورة الفئة');
+    } catch(e){ showToast('❌ فشل رفع الصورة: '+e.message); }
   }
-  MENU.push({ cat: name, image: catImage, items: [] });
+  MENU.push({cat: name, image: catImage, items: []});
   await saveMenuToFirebase();
   loadAdminPanel();
   document.getElementById('new-cat-name').value = '';
   document.getElementById('new-cat-image').value = '';
-  const preview = document.getElementById('new-cat-preview');
-  if (preview) preview.style.display = 'none';
+  document.getElementById('new-cat-preview').style.display = 'none';
   buildMenu();
   showToast('✅ تمت إضافة الفئة');
 }
-
 async function deleteCat(ci){
   if(!confirm('حذف هذه الفئة وكل عناصرها؟')) return;
   MENU.splice(ci,1);
@@ -777,7 +688,7 @@ function openEditItem(id){
   sel.innerHTML = MENU.map((c,i)=>`<option value="${i}" ${i===ci?'selected':''}>${c.cat}</option>`).join('');
   document.getElementById('item-modal').classList.add('active');
 }
-async function saveItem() {
+async function saveItem(){
   let id = document.getElementById('modal-item-id').value;
   let catIdx = parseInt(document.getElementById('modal-cat').value);
   let name = document.getElementById('modal-name').value.trim();
@@ -788,48 +699,34 @@ async function saveItem() {
   let imageUrl = document.getElementById('modal-image-url').value.trim();
   let imageFile = document.getElementById('modal-image-file').files[0];
   let addons = collectAddonsFromUI();
-
-  if (!name || priceSYP <= 0) { showToast('❌ الاسم والسعر مطلوبان'); return; }
-
+  if(!name || priceSYP<=0){ showToast('❌ الاسم والسعر مطلوبان'); return; }
   let finalImage = imageUrl;
-  if (imageFile) {
+  if(imageFile){
     try {
       const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
       await uploadBytes(storageRef, imageFile);
       finalImage = await getDownloadURL(storageRef);
-    } catch (err) {
-      console.error("Image upload error:", err);
-      showToast('فشل رفع الصورة، سيتم حفظ المنتج بدون صورة');
-    }
+      showToast('✅ تم رفع الصورة');
+    } catch(e){ showToast('❌ فشل رفع الصورة: '+e.message); }
   }
-
-  if (id) {
-    let item = MENU.flatMap(c => c.items).find(i => i.id == id);
-    if (item) {
+  if(id){
+    let item = MENU.flatMap(c=>c.items).find(i=>i.id==id);
+    if(item){
       item.name = name; item.desc = desc; item.price = priceSYP; item.image = finalImage; item.addons = addons;
-    } else {
-      showToast('❌ المنتج غير موجود');
-      return;
     }
   } else {
     let newId = Date.now();
-    MENU[catIdx].items.push({ id: newId, name, desc, price: priceSYP, image: finalImage, addons, available: true });
+    MENU[catIdx].items.push({ id:newId, name, desc, price:priceSYP, image:finalImage, addons, available:true });
   }
-
-  try {
-    await saveMenuToFirebase();
-    loadAdminPanel();
-    buildMenu();
-    closeModal();
-    showToast('✅ تم الحفظ');
-  } catch (err) {
-    console.error("Firestore save error:", err);
-    showToast('❌ فشل الحفظ في قاعدة البيانات');
-  }
+  await saveMenuToFirebase();
+  loadAdminPanel();
+  buildMenu();
+  closeModal();
+  showToast('✅ تم الحفظ');
 }
 function closeModal(){ document.getElementById('item-modal').classList.remove('active'); }
 
-// معاينة صورة الفئة الجديدة
+// Preview for category image
 document.getElementById('new-cat-image')?.addEventListener('change', function(e){
   const file = e.target.files[0];
   if(file){
@@ -843,9 +740,10 @@ document.getElementById('new-cat-image')?.addEventListener('change', function(e)
   }
 });
 
-// بدء التطبيق
+// ------------------- Initialization -------------------
 selectOrderMethod('dinein');
 loadDataFromFirebase();
+// Make functions global for HTML onclick
 window.setCurrency = setCurrency;
 window.goTo = goTo;
 window.checkAdminPass = checkAdminPass;
