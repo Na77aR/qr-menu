@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>نظام طلب المطعم - نسخة مستقلة</title>
+<title>نظام طلب المطعم</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
-/* ========== الأنماط الأساسية ========== */
+/* ========== جميع الأنماط السابقة مع تعديل أزرار الفئات ========== */
 :root{--gold:#c8963e;--gold-light:#e8b86d;--bg:#0f0e0d;--bg2:#1a1814;--bg3:#1e1c18;--border:#2e2b24;--text:#f5f0e8;--muted:#a09080;--dim:#7a7060;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direction:rtl;}
@@ -33,10 +33,13 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
 .hero-slide.active{opacity:1;}
 .hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.6),rgba(0,0,0,.1));}
 .rates-banner{background:#1a1814;border-bottom:1px solid var(--border);padding:8px 16px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap;font-size:12px;}
-.cat-bar{display:flex;gap:8px;padding:10px 16px;overflow-x:auto;background:var(--bg2);scrollbar-width:none;}
+/* شريط الفئات المعدل */
+.cat-bar{display:flex;gap:12px;padding:10px 16px;overflow-x:auto;background:var(--bg2);scrollbar-width:none;}
 .cat-bar::-webkit-scrollbar{display:none;}
-.cat-btn{white-space:nowrap;padding:6px 18px;border-radius:40px;border:none;cursor:pointer;font-size:13px;font-weight:700;background:#2a2520;color:var(--muted);}
-.cat-btn.active{background:var(--gold);color:#1a1208;}
+.cat-btn{position:relative;min-width:100px;height:100px;border-radius:16px;border:none;cursor:pointer;background-size:cover;background-position:center;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px;transition:0.2s;}
+.cat-btn.active{border:3px solid var(--gold);transform:scale(0.98);}
+.cat-btn span{position:relative;z-index:2;background:rgba(0,0,0,0.7);padding:6px 12px;border-radius:30px;font-size:14px;font-weight:700;color:white;backdrop-filter:blur(4px);}
+.cat-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.6),rgba(0,0,0,0.1));z-index:1;}
 .menu-page{padding:12px 16px 100px;}
 .section-title{font-size:18px;font-weight:800;color:var(--gold-light);margin-bottom:12px;border-right:4px solid var(--gold);padding-right:10px;display:flex;align-items:center;gap:8px;}
 .section-title img{width:28px;height:28px;border-radius:8px;object-fit:cover;}
@@ -98,8 +101,6 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
 .method-btn{flex:1;padding:10px;border-radius:30px;border:1px solid var(--border);background:var(--bg2);color:var(--muted);cursor:pointer;text-align:center;font-weight:700;}
 .method-btn.active{background:var(--gold);color:#1a1208;border-color:var(--gold);}
 .dynamic-field{margin-top:8px;}
-.export-import{display:flex;gap:10px;margin-bottom:16px;justify-content:center;}
-.export-btn,.import-btn{background:#2a2520;border:1px solid var(--border);border-radius:30px;padding:8px 16px;color:var(--text);cursor:pointer;font-size:12px;}
 </style>
 </head>
 <body>
@@ -170,12 +171,6 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
 <div id="page-admin" class="page">
   <div style="background:linear-gradient(135deg,#c8963e,#e8b86d);padding:18px;"><h2 style="color:#1a1208;">⚙️ إدارة المطعم</h2></div>
   <button class="back-btn" onclick="goTo('page-menu')">← العودة للمنيو</button>
-  
-  <div class="export-import">
-    <button class="export-btn" onclick="exportData()">📤 تصدير البيانات (نسخة احتياطية)</button>
-    <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importData(this)">
-    <button class="import-btn" onclick="document.getElementById('import-file').click()">📥 استيراد البيانات</button>
-  </div>
 
   <div class="admin-section"><div class="admin-section-title">📊 إحصائيات المبيعات</div>
     <div class="stats-box" style="padding:12px;">
@@ -231,11 +226,10 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
 <div class="bottom-nav">
   <button class="nav-btn active" onclick="goTo('page-menu')">🏠<span>الرئيسية</span></button>
   <button class="nav-btn" onclick="goTo('page-cart')">🛒<span>السلة</span></button>
-  <button class="nav-btn" onclick="goTo('page-admin-login')">🔑<span>أدمن</span></button>
 </div>
 
 <script>
-// ===================== البيانات والتخزين المحلي =====================
+// ===================== الإعدادات الافتراضية =====================
 let CONFIG = {
   name: "مطعمي",
   whatsapp: "963912345678",
@@ -254,7 +248,7 @@ let activeCat = 0, activeCur = 'SYP', nameClickCount = 0;
 let currentProductModal = null;
 let currentOrderMethod = "dinein";
 
-// تحميل البيانات من localStorage
+// ===================== تحميل وحفظ البيانات =====================
 function loadAllData() {
   let savedConfig = localStorage.getItem('resto_config');
   if (savedConfig) CONFIG = JSON.parse(savedConfig);
@@ -262,7 +256,6 @@ function loadAllData() {
   if (savedMenu) MENU = JSON.parse(savedMenu);
   let savedOrders = localStorage.getItem('resto_orders');
   if (savedOrders) ORDERS = JSON.parse(savedOrders);
-  
   document.getElementById('rest-name-display').innerText = CONFIG.name;
   buildRatesBanner();
   buildPriceFilterOptions();
@@ -276,37 +269,6 @@ function saveAllData() {
   localStorage.setItem('resto_config', JSON.stringify(CONFIG));
   localStorage.setItem('resto_menu', JSON.stringify(MENU));
   localStorage.setItem('resto_orders', JSON.stringify(ORDERS));
-}
-
-// تصدير واستيراد البيانات
-function exportData() {
-  let data = { config: CONFIG, menu: MENU, orders: ORDERS };
-  let blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
-  let url = URL.createObjectURL(blob);
-  let a = document.createElement('a');
-  a.href = url;
-  a.download = `restaurant_backup_${new Date().toISOString().slice(0,19)}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast("✅ تم تصدير البيانات");
-}
-function importData(input) {
-  let file = input.files[0];
-  if (!file) return;
-  let reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      let data = JSON.parse(e.target.result);
-      if (data.config) CONFIG = data.config;
-      if (data.menu) MENU = data.menu;
-      if (data.orders) ORDERS = data.orders;
-      saveAllData();
-      loadAllData();
-      showToast("✅ تم استيراد البيانات بنجاح");
-    } catch(err) { showToast("❌ ملف غير صالح"); }
-  };
-  reader.readAsText(file);
-  input.value = '';
 }
 
 // ===================== دوال العملات =====================
@@ -365,8 +327,19 @@ function buildRatesBanner(){
 function buildMenu(){
   if (!MENU || !MENU.length) return;
   document.getElementById('rest-name-display').innerText = CONFIG.name;
+  // الضغط 5 مرات على اسم المطعم لفتح الأدمن (بدون زر أدمن في الأسفل)
   const nameEl = document.getElementById('rest-name-display');
-  nameEl.onclick = (e) => { e.stopPropagation(); nameClickCount++; if(nameClickCount>=5){ nameClickCount=0; document.getElementById('admin-pass').value=''; document.getElementById('pass-error').style.display='none'; goTo('page-admin-login'); } setTimeout(()=>nameClickCount=0,3000); };
+  nameEl.onclick = (e) => { 
+    e.stopPropagation(); 
+    nameClickCount++; 
+    if(nameClickCount >= 5){ 
+      nameClickCount = 0; 
+      document.getElementById('admin-pass').value = ''; 
+      document.getElementById('pass-error').style.display = 'none'; 
+      goTo('page-admin-login'); 
+    } 
+    setTimeout(() => nameClickCount = 0, 3000); 
+  };
   let logoBox = document.getElementById('logo-box'); logoBox.innerHTML = CONFIG.logo ? `<img src="${CONFIG.logo}">` : '';
   let socialDiv = document.getElementById('social-links-container'); socialDiv.innerHTML = '';
   if(CONFIG.instagram && CONFIG.instagram.trim() && CONFIG.instagram!=='#') socialDiv.innerHTML += `<a class="social-btn" href="${CONFIG.instagram}" target="_blank">IG</a>`;
@@ -377,7 +350,18 @@ function buildMenu(){
   MENU.forEach((cat, ci) => {
     let btn = document.createElement('button');
     btn.className = 'cat-btn' + (ci===activeCat ? ' active' : '');
-    btn.innerHTML = cat.image ? `<img src="${cat.image}" style="width:20px;height:20px;border-radius:4px;margin-left:5px;"> ${cat.cat}` : cat.cat;
+    // تعيين صورة الفئة كخلفية للزر
+    if (cat.image && cat.image.trim() !== '') {
+      btn.style.backgroundImage = `url('${cat.image}')`;
+    } else {
+      btn.style.backgroundImage = `linear-gradient(135deg, #2a2520, #1a1814)`;
+    }
+    btn.style.backgroundSize = 'cover';
+    btn.style.backgroundPosition = 'center';
+    // إضافة اسم الفئة داخل span فوق الصورة
+    let span = document.createElement('span');
+    span.innerText = cat.cat;
+    btn.appendChild(span);
     btn.onclick = () => { activeCat = ci; buildMenu(); };
     bar.appendChild(btn);
   });
@@ -394,7 +378,7 @@ function buildMenu(){
   content.innerHTML = ''; content.appendChild(pageDiv); updateFloat();
 }
 
-// ===================== دوال السلة والمنتج =====================
+// ===================== دوال السلة والمنتج ===================== (نفسها تماماً لم تتغير)
 function openProductModal(itemId){
   let item = MENU.flatMap(c=>c.items).find(i=>i.id==itemId);
   if(!item.available){ showToast('هذا المنتج غير متوفر حالياً'); return; }
@@ -520,7 +504,7 @@ function goTo(id){
   window.scrollTo(0,0);
 }
 
-// ===================== لوحة الأدمن =====================
+// ===================== لوحة الأدمن ===================== (نفسها)
 function checkAdminPass(){
   if(document.getElementById('admin-pass').value === CONFIG.password){
     document.getElementById('pass-error').style.display='none';
@@ -809,7 +793,6 @@ window.clearCart = clearCart;
 window.sendWhatsApp = sendWhatsApp;
 window.toggleAvailability = toggleAvailability;
 window.selectOrderMethod = selectOrderMethod;
-window.exportData = exportData;
 </script>
 </body>
 </html>
