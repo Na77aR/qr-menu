@@ -3,13 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<!-- حل مشكلة CSP (سياسة أمان المحتوى) التي تمنع تقييم الأكواد -->
-<meta http-equiv="Content-Security-Policy" content="script-src 'unsafe-eval' 'unsafe-inline' https: 'self';">
-<title>نظام طلب المطعم - سحابي متكامل</title>
+<title>نظام طلب المطعم - سحابي متكامل (Supabase)</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
-/* جميع الأنماط كما هي (نفس الكود السابق) */
+/* نفس الأنماط السابقة (لم تتغير) */
 :root{--gold:#c8963e;--gold-light:#e8b86d;--bg:#0f0e0d;--bg2:#1a1814;--bg3:#1e1c18;--border:#2e2b24;--text:#f5f0e8;--muted:#a09080;--dim:#7a7060;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direction:rtl;}
@@ -224,27 +222,23 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
 <div class="toast" id="toast"></div>
 <div class="bottom-nav"><button class="nav-btn active" onclick="goTo('page-menu')">🏠<span>الرئيسية</span></button><button class="nav-btn" onclick="goTo('page-cart')">🛒<span>السلة</span></button></div>
 
-<script type="module">
-// ------------------- Firebase Imports -------------------
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, doc, setDoc, collection, getDocs, addDoc, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ------------------- Supabase Configuration -------------------
+// ⚠️ استبدل هذه القيم بالقيم التي حصلت عليها من مشروع Supabase الخاص بك
+const SUPABASE_URL = "https://dasxvibcodvzisqbzzgw.supabase.co/rest/v1/";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhc3h2aWJjb2R2emlzcWJ6emd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNTkyODIsImV4cCI6MjA5NTYzNTI4Mn0.TWivD2fMFmxTf9mQj_jp6g5fksXaxgX0-evOFxCRWhk";
 
-// ------------------- Firebase Config -------------------
-const firebaseConfig = {
-  apiKey: "AIzaSyCSwKVz-cjS3r0-6i0ahTgzzyF3e1_N-lk",
-  authDomain: "qr-menu-3d9a7.firebaseapp.com",
-  projectId: "qr-menu-3d9a7",
-  storageBucket: "qr-menu-3d9a7.firebasestorage.app",
-  messagingSenderId: "232494624885",
-  appId: "1:232494624885:web:c02d73e44ea0a85c0d883c",
-  measurementId: "G-6REPXLMTMR"
-};
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+// تهيئة Supabase
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// تحديد معرف المطعم (يمكن تغييره لكل مطعم)
+// في حالة البيع لأكثر من مطعم، يمكنك جعل هذا المعرف فريداً لكل عميل
+const RESTAURANT_ID = "restaurant_main";
 
 // ------------------- Global Variables -------------------
 let CONFIG = { name:"مطعمي", whatsapp:"963912345678", instagram:"", facebook:"", logo:"", deliveryFee:0, password:"admin123", rates:{ usd:13000, try_rate:380 }, slides:[] };
-let MENU = [];
+let MENU = []; // سيتم ملؤه من قاعدة البيانات
 let ORDERS = [];
 let cart = JSON.parse(localStorage.getItem('saved_cart') || '{}');
 let activeCat = 0, activeCur = 'SYP', nameClickCount = 0;
@@ -263,47 +257,126 @@ function getTotal(){ return Object.values(cart).reduce((s,i)=>s+i.totalPrice,0);
 function getTotalItems(){ return Object.values(cart).reduce((s,i)=>s+i.qty,0); }
 function updateFloat(){ let t=getTotalItems(), btn=document.getElementById('float-cart'); btn.style.display=t>0?'flex':'none'; document.getElementById('cart-count').innerText=t; document.getElementById('cart-total-float').innerText=fmt(getTotal()); }
 
-// ------------------- Firebase Save/Load -------------------
-async function saveConfigToFirebase() {
-  const configDoc = doc(db, "restaurant", "config");
-  await setDoc(configDoc, CONFIG, { merge: true });
-  console.log("✅ Config saved");
+// ------------------- Supabase Load/Save -------------------
+async function loadConfig() {
+  const { data, error } = await supabase
+    .from('config')
+    .select('*')
+    .eq('restaurant_id', RESTAURANT_ID)
+    .single();
+  if (error && error.code !== 'PGRST116') console.error(error);
+  if (data) {
+    CONFIG = {
+      name: data.name,
+      whatsapp: data.whatsapp,
+      instagram: data.instagram || '',
+      facebook: data.facebook || '',
+      logo: data.logo || '',
+      deliveryFee: data.delivery_fee || 0,
+      password: data.password || 'admin123',
+      rates: { usd: data.rates_usd || 13000, try_rate: data.rates_try || 380 },
+      slides: data.slides || []
+    };
+  } else {
+    // إنشاء سجل افتراضي إذا لم يكن موجوداً
+    await supabase.from('config').insert([{
+      restaurant_id: RESTAURANT_ID,
+      name: CONFIG.name,
+      whatsapp: CONFIG.whatsapp,
+      delivery_fee: CONFIG.deliveryFee,
+      password: CONFIG.password,
+      rates_usd: CONFIG.rates.usd,
+      rates_try: CONFIG.rates.try_rate,
+      slides: []
+    }]);
+  }
+  document.getElementById('rest-name-display').innerText = CONFIG.name;
+  buildRatesBanner();
+  buildPriceFilterOptions();
+  if(document.getElementById('page-menu').classList.contains('active')) buildMenu();
+  if(document.getElementById('page-cart').classList.contains('active')) buildCart();
 }
-async function saveMenuToFirebase() {
-  const menuRef = collection(db, "menu");
-  const snapshot = await getDocs(menuRef);
-  for(const docSnap of snapshot.docs) await deleteDoc(docSnap.ref);
-  for(let catObj of MENU) await addDoc(menuRef, catObj);
-  console.log("✅ Menu saved");
+
+async function saveConfigToSupabase() {
+  await supabase.from('config').upsert({
+    restaurant_id: RESTAURANT_ID,
+    name: CONFIG.name,
+    whatsapp: CONFIG.whatsapp,
+    instagram: CONFIG.instagram,
+    facebook: CONFIG.facebook,
+    logo: CONFIG.logo,
+    delivery_fee: CONFIG.deliveryFee,
+    password: CONFIG.password,
+    rates_usd: CONFIG.rates.usd,
+    rates_try: CONFIG.rates.try_rate,
+    slides: CONFIG.slides,
+    updated_at: new Date()
+  });
 }
-async function saveOrderToFirebase(order) {
-  const ordersRef = collection(db, "orders");
-  await addDoc(ordersRef, order);
+
+async function loadMenu() {
+  const { data, error } = await supabase
+    .from('menu')
+    .select('*')
+    .eq('restaurant_id', RESTAURANT_ID);
+  if (error) console.error(error);
+  if (data && data.length) {
+    MENU = data.map(row => ({
+      cat: row.cat,
+      image: row.cat_image || '',
+      items: row.items || []
+    }));
+  } else {
+    MENU = [{ cat: "الرئيسية", image: "", items: [] }];
+  }
+  buildMenu();
+  if (document.getElementById('page-admin').classList.contains('active')) loadAdminPanel();
 }
-function loadDataFromFirebase() {
-  const configDoc = doc(db, "restaurant", "config");
-  onSnapshot(configDoc, (snap) => {
-    if(snap.exists()) CONFIG = snap.data();
-    else setDoc(configDoc, CONFIG);
-    document.getElementById('rest-name-display').innerText = CONFIG.name;
-    buildRatesBanner(); buildPriceFilterOptions();
-    if(document.getElementById('page-menu').classList.contains('active')) buildMenu();
-    if(document.getElementById('page-cart').classList.contains('active')) buildCart();
+
+async function saveMenuToSupabase() {
+  // حذف السجلات القديمة ثم إدراج الجديدة (للتزامن البسيط)
+  await supabase.from('menu').delete().eq('restaurant_id', RESTAURANT_ID);
+  if (MENU.length) {
+    const toInsert = MENU.map(catObj => ({
+      restaurant_id: RESTAURANT_ID,
+      cat: catObj.cat,
+      cat_image: catObj.image || '',
+      items: catObj.items
+    }));
+    await supabase.from('menu').insert(toInsert);
+  }
+}
+
+async function loadOrders() {
+  const { data, error } = await supabase
+    .from('orders')
+    .select('*')
+    .eq('restaurant_id', RESTAURANT_ID)
+    .order('date_time', { ascending: false });
+  if (error) console.error(error);
+  if (data) ORDERS = data;
+  updateStats();
+  loadOrdersTable();
+}
+
+async function saveOrderToSupabase(order) {
+  await supabase.from('orders').insert({
+    restaurant_id: RESTAURANT_ID,
+    customer: order.customer,
+    address: order.address,
+    method: order.method,
+    table_num: order.table,
+    delivery_time: order.deliveryTime,
+    pickup_time: order.pickupTime,
+    items: order.items,
+    subtotal: order.subtotal,
+    delivery_fee: order.delivery,
+    total: order.total,
+    note: order.note,
+    date: order.date,
+    date_time: order.dateTime
   });
-  const menuRef = collection(db, "menu");
-  onSnapshot(query(menuRef), (snapshot) => {
-    MENU = [];
-    snapshot.forEach(doc => MENU.push(doc.data()));
-    if(MENU.length === 0) MENU = [{cat:"الرئيسية", items:[], image:""}];
-    buildMenu();
-    if(document.getElementById('page-admin').classList.contains('active')) loadAdminPanel();
-  });
-  const ordersRef = collection(db, "orders");
-  onSnapshot(query(ordersRef, orderBy("dateTime", "desc")), (snapshot) => {
-    ORDERS = [];
-    snapshot.forEach(doc => ORDERS.push(doc.data()));
-    updateStats(); loadOrdersTable();
-  });
+  loadOrders(); // تحديث الواجهة بعد الحفظ
 }
 
 // ------------------- Stats & Orders -------------------
@@ -317,14 +390,14 @@ function updateStats(){
 }
 function loadOrdersTable(){
   let tbody = document.getElementById('orders-list'); tbody.innerHTML = '';
-  [...ORDERS].reverse().forEach((order, idx) => {
+  ORDERS.forEach((order, idx) => {
     tbody.innerHTML += `<tr><td>${idx+1}</td><td>${order.customer}</td><td>${order.total.toLocaleString()} ل.س</td><td>${order.date}</td><td><button class="print-btn" onclick='printOrder(${JSON.stringify(order).replace(/'/g, "\\'")})'>🖨️ طباعة</button></td></tr>`;
   });
 }
 window.printOrder = function(order){
   let w = window.open('', '_blank');
   let itemsHtml = order.items.map(it => `<li>${it.name} x${it.qty} - ${it.totalPrice.toLocaleString()} ل.س</li>`).join('');
-  w.document.write(`<html dir="rtl"><head><title>طلب ${order.customer}</title><style>body{font-family:sans-serif;padding:20px;}</style></head><body><h2>طلب جديد - ${CONFIG.name}</h2><p><strong>العميل:</strong> ${order.customer}</p><p><strong>العنوان:</strong> ${order.address}</p><p><strong>طريقة الطلب:</strong> ${order.method||'غير محدد'}</p>${order.table?`<p><strong>طاولة:</strong> ${order.table}</p>`:''}${order.deliveryTime?`<p><strong>وقت التوصيل:</strong> ${order.deliveryTime}</p>`:''}${order.pickupTime?`<p><strong>وقت الاستلام:</strong> ${order.pickupTime}</p>`:''}<h3>الطلبات:</h3><ul>${itemsHtml}</ul><p><strong>المجموع الفرعي:</strong> ${order.subtotal.toLocaleString()} ل.س</p><p><strong>التوصيل:</strong> ${order.delivery.toLocaleString()} ل.س</p><h3>المجموع النهائي: ${order.total.toLocaleString()} ل.س</h3><button onclick="window.print()">طباعة</button></body></html>`);
+  w.document.write(`<html dir="rtl"><head><title>طلب ${order.customer}</title><style>body{font-family:sans-serif;padding:20px;}</style></head><body><h2>طلب جديد - ${CONFIG.name}</h2><p><strong>العميل:</strong> ${order.customer}</p><p><strong>العنوان:</strong> ${order.address}</p><p><strong>طريقة الطلب:</strong> ${order.method||'غير محدد'}</p>${order.table_num?`<p><strong>طاولة:</strong> ${order.table_num}</p>`:''}${order.delivery_time?`<p><strong>وقت التوصيل:</strong> ${order.delivery_time}</p>`:''}${order.pickup_time?`<p><strong>وقت الاستلام:</strong> ${order.pickup_time}</p>`:''}<h3>الطلبات:</h3><ul>${itemsHtml}</ul><p><strong>المجموع الفرعي:</strong> ${order.subtotal.toLocaleString()} ل.س</p><p><strong>التوصيل:</strong> ${order.delivery_fee.toLocaleString()} ل.س</p><h3>المجموع النهائي: ${order.total.toLocaleString()} ل.س</h3><button onclick="window.print()">طباعة</button></body></html>`);
   w.document.close();
 };
 
@@ -349,6 +422,7 @@ function buildRatesBanner(){
   document.getElementById('rates-banner').innerHTML = `<span>💱 أسعار الصرف:</span><span>1$ = <strong>${Number(CONFIG.rates.usd).toLocaleString()} ل.س جديدة</strong></span><span>1₺ = <strong>${Number(CONFIG.rates.try_rate).toLocaleString()} ل.س جديدة</strong></span>`;
 }
 function buildMenu(){
+  if (!MENU || !MENU.length) return;
   document.getElementById('rest-name-display').innerText = CONFIG.name;
   const nameEl = document.getElementById('rest-name-display');
   nameEl.onclick = (e) => { e.stopPropagation(); nameClickCount++; if(nameClickCount>=5){ nameClickCount=0; document.getElementById('admin-pass').value=''; document.getElementById('pass-error').style.display='none'; goTo('page-admin-login'); } setTimeout(()=>nameClickCount=0,3000); };
@@ -370,9 +444,9 @@ function buildMenu(){
   let maxPrice = document.getElementById('price-filter')?.value;
   let priceLimit = (maxPrice && maxPrice!=='all') ? parseInt(maxPrice) : Infinity;
   let pageDiv = document.createElement('div'); pageDiv.className = 'menu-page';
-  let currentCat = MENU[activeCat] || {cat:"الرئيسية", items:[], image:""};
+  let currentCat = MENU[activeCat] || {cat:"الرئيسية", items:[]};
   pageDiv.innerHTML = `<div class="section-title">${currentCat.image ? `<img src="${currentCat.image}">` : ''} ${currentCat.cat}</div>`;
-  currentCat.items.filter(item => item.name.toLowerCase().includes(searchTerm) && (maxPrice==='all' || item.price<=priceLimit)).forEach(item => {
+  (currentCat.items || []).filter(item => item.name.toLowerCase().includes(searchTerm) && (maxPrice==='all' || item.price<=priceLimit)).forEach(item => {
     const imgSrc = item.image && item.image.trim() ? item.image : 'https://via.placeholder.com/400x150?text=No+Image';
     pageDiv.innerHTML += `<div class="item-card"><img class="item-img" src="${imgSrc}" onerror="this.src='https://via.placeholder.com/400x150?text=No+Image'"><div class="item-info"><div class="item-name"><span>${item.name}</span><span class="item-price">${fmt(item.price)}</span></div><div class="item-desc">${item.desc}</div><div class="item-footer"><button class="btn-order" onclick="openProductModal(${item.id})">🛒 طلب</button>${!item.available?'<span class="unavailable-badge">غير متوفر</span>':''}</div></div></div>`;
   });
@@ -475,13 +549,13 @@ function sendWhatsApp(){
   msg += `\n🕐 ${new Date().toLocaleTimeString('en-GB')}`;
   window.open(`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(msg)}`,'_blank');
   let orderRecord = {
-    id: Date.now(), customer: name, address: address, method: method, table: table,
+    customer: name, address: address, method: method, table: table,
     deliveryTime: deliveryTime, pickupTime: pickupTime,
     items: Object.values(cart).map(i=>({name:i.name, qty:i.qty, totalPrice:i.totalPrice})),
     subtotal: subtotal, delivery: delivery, total: total, note: note,
-    date: new Date().toLocaleDateString('en-CA'), dateTime: new Date().toLocaleString()
+    date: new Date().toLocaleDateString('en-CA'), dateTime: new Date().toISOString()
   };
-  saveOrderToFirebase(orderRecord);
+  saveOrderToSupabase(orderRecord);
   cart={}; saveCartToLocal(); buildCart(); updateFloat(); goTo('page-menu'); showToast('تم إرسال الطلب، سيفتح واتساب');
 }
 function goTo(id){
@@ -493,7 +567,7 @@ function goTo(id){
   window.scrollTo(0,0);
 }
 
-// ------------------- Admin Panel (Fixed addCategory) -------------------
+// ------------------- Admin Panel -------------------
 function checkAdminPass(){
   if(document.getElementById('admin-pass').value === CONFIG.password){
     document.getElementById('pass-error').style.display='none';
@@ -505,6 +579,7 @@ function checkAdminPass(){
   }
 }
 function loadAdminPanel(){
+  if (!MENU) MENU = [];
   document.getElementById('cfg-name').value = CONFIG.name;
   document.getElementById('cfg-whatsapp').value = CONFIG.whatsapp;
   document.getElementById('cfg-instagram').value = CONFIG.instagram||'';
@@ -522,7 +597,7 @@ function loadAdminPanel(){
   listDiv.innerHTML = '';
   MENU.forEach((cat, ci) => {
     listDiv.innerHTML += `<div style="background:#1f1c18;padding:8px;display:flex;justify-content:space-between;align-items:center;"><div>${cat.image ? `<img src="${cat.image}" style="width:30px;height:30px;border-radius:6px;margin-left:5px;">` : ''} ${cat.cat}</div><button class="btn-danger" onclick="deleteCat(${ci})">حذف الفئة</button></div>`;
-    cat.items.forEach(item => {
+    (cat.items || []).forEach(item => {
       listDiv.innerHTML += `<div class="admin-item"><img class="admin-item-img" src="${item.image || 'https://via.placeholder.com/40'}" onerror="this.src='https://via.placeholder.com/40'"><div style="flex:1;"><div><strong>${item.name}</strong></div><div>${fmtSYP(item.price)}</div><div>${item.available?'✅ متوفر':'❌ غير متوفر'}</div><div>${item.addons?.length||0} إضافة</div></div><button class="btn-sm" onclick="openEditItem(${item.id})">تعديل</button><button class="btn-danger" onclick="deleteItem(${item.id})">حذف</button><button class="btn-sm" onclick="toggleAvailability(${item.id})">تبديل</button></div>`;
     });
   });
@@ -531,12 +606,12 @@ function loadAdminPanel(){
 }
 async function toggleAvailability(id){
   let item = MENU.flatMap(c=>c.items).find(i=>i.id==id);
-  if(item){ item.available = !item.available; await saveMenuToFirebase(); buildMenu(); loadAdminPanel(); showToast(item.available?'تم التفعيل':'تم التعطيل'); }
+  if(item){ item.available = !item.available; await saveMenuToSupabase(); buildMenu(); loadAdminPanel(); showToast(item.available?'تم التفعيل':'تم التعطيل'); }
 }
 async function saveRates(){
   CONFIG.rates.usd = parseFloat(document.getElementById('rate-usd').value);
   CONFIG.rates.try_rate = parseFloat(document.getElementById('rate-try').value);
-  await saveConfigToFirebase();
+  await saveConfigToSupabase();
   buildRatesBanner();
   showToast('✅ تم تحديث أسعار الصرف');
 }
@@ -555,14 +630,14 @@ async function saveConfig(){
     const reader = new FileReader();
     reader.onload = function(e) {
       CONFIG.logo = e.target.result;
-      saveConfigToFirebase().then(()=>{
+      saveConfigToSupabase().then(()=>{
         loadAdminPanel(); buildMenu();
         showToast('✅ تم حفظ الإعدادات والشعار');
       });
     };
     reader.readAsDataURL(logoFile);
   } else {
-    await saveConfigToFirebase();
+    await saveConfigToSupabase();
     loadAdminPanel(); buildMenu();
     showToast('✅ تم حفظ الإعدادات');
   }
@@ -591,53 +666,48 @@ async function uploadGalleryImages(){
       reader.readAsDataURL(file);
     });
   }
-  await saveConfigToFirebase();
+  await saveConfigToSupabase();
   buildSlider();
   buildGalleryPreview();
   showToast('✅ تمت إضافة الصور');
 }
 async function removeGalleryImage(idx){
   CONFIG.slides.splice(idx,1);
-  await saveConfigToFirebase();
+  await saveConfigToSupabase();
   buildSlider();
   buildGalleryPreview();
 }
-// ✅ FIXED addCategory - تعمل مع أو بدون صورة وتحدث الواجهة فوراً
 async function addCategory() {
   let name = document.getElementById('new-cat-name').value.trim();
-  if (!name) {
-    showToast('❌ أدخل اسم الفئة');
-    return;
-  }
+  if (!name) { showToast('❌ أدخل اسم الفئة'); return; }
   let imageFile = document.getElementById('new-cat-image').files[0];
-  
-  const addCategoryToLocalAndSync = async (imageBase64 = '') => {
-    MENU.push({ cat: name, image: imageBase64, items: [] });
-    await saveMenuToFirebase();
-    // تحديث الواجهة مباشرة (بدون انتظار onSnapshot)
-    loadAdminPanel();   // تحديث لوحة الأدمن
-    buildMenu();        // تحديث شريط الفئات في المنيو
-    document.getElementById('new-cat-name').value = '';
-    document.getElementById('new-cat-image').value = '';
-    document.getElementById('new-cat-preview').style.display = 'none';
-    showToast('✅ تمت إضافة الفئة');
-  };
-
+  let imageBase64 = '';
   if (imageFile) {
     const reader = new FileReader();
     reader.onload = async function(e) {
-      await addCategoryToLocalAndSync(e.target.result);
+      imageBase64 = e.target.result;
+      await finishAddCategory(name, imageBase64);
     };
     reader.readAsDataURL(imageFile);
   } else {
-    await addCategoryToLocalAndSync('');
+    await finishAddCategory(name, '');
   }
+}
+async function finishAddCategory(name, imageBase64){
+  MENU.push({ cat: name, image: imageBase64, items: [] });
+  await saveMenuToSupabase();
+  loadAdminPanel();
+  buildMenu();
+  document.getElementById('new-cat-name').value = '';
+  document.getElementById('new-cat-image').value = '';
+  document.getElementById('new-cat-preview').style.display = 'none';
+  showToast('✅ تمت إضافة الفئة');
 }
 async function deleteCat(ci){
   if(!confirm('حذف هذه الفئة وكل عناصرها؟')) return;
   MENU.splice(ci,1);
   if(activeCat >= MENU.length) activeCat = 0;
-  await saveMenuToFirebase();
+  await saveMenuToSupabase();
   buildMenu();
   loadAdminPanel();
   showToast('✅ تم الحذف');
@@ -645,7 +715,7 @@ async function deleteCat(ci){
 async function deleteItem(id){
   if(!confirm('حذف هذا الصنف؟')) return;
   for(let cat of MENU) cat.items = cat.items.filter(i => i.id !== id);
-  await saveMenuToFirebase();
+  await saveMenuToSupabase();
   buildMenu();
   loadAdminPanel();
   showToast('✅ تم الحذف');
@@ -736,7 +806,7 @@ async function finishSaveItem(id, catIdx, name, desc, price, image, addons){
     let newId = Date.now();
     MENU[catIdx].items.push({ id:newId, name, desc, price, image, addons, available:true });
   }
-  await saveMenuToFirebase();
+  await saveMenuToSupabase();
   loadAdminPanel();
   buildMenu();
   closeModal();
@@ -773,8 +843,9 @@ document.getElementById('cfg-logo-file')?.addEventListener('change', function(e)
 
 // ------------------- Initialization -------------------
 selectOrderMethod('dinein');
-loadDataFromFirebase();
-// Make functions global for HTML onclick
+loadConfig().then(() => loadMenu());
+loadOrders();
+// Make functions global
 window.setCurrency = setCurrency;
 window.goTo = goTo;
 window.checkAdminPass = checkAdminPass;
