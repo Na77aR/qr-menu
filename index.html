@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
-/* جميع الأنماط السابقة (نفسها) */
+/* [جميع الأنماط كما هي، لم تتغير] */
 :root{--gold:#c8963e;--gold-light:#e8b86d;--bg:#0f0e0d;--bg2:#1a1814;--bg3:#1e1c18;--border:#2e2b24;--text:#f5f0e8;--muted:#a09080;--dim:#7a7060;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direction:rtl;}
@@ -180,7 +180,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
   </div>
 
   <div class="admin-section"><div class="admin-section-title">📋 الطلبات المسجلة</div>
-    <div style="padding:12px;overflow-x:auto;"><table class="orders-table" id="orders-table"><thead> <th>#</th><th>العميل</th><th>المبلغ</th><th>التاريخ</th><th>طباعة</th> </thead><tbody id="orders-list"></tbody> <table></div>
+    <div style="padding:12px;overflow-x:auto;"><table class="orders-table" id="orders-table"><thead> <th>#</th><th>العميل</th><th>المبلغ</th><th>التاريخ</th><th>طباعة</th> </thead><tbody id="orders-list"></tbody> </table></div>
   </div>
 
   <div class="admin-section"><div class="admin-section-title">💱 أسعار الصرف</div>
@@ -215,7 +215,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
 
 <!-- مودال إضافة/تعديل صنف -->
 <div class="modal-overlay" id="item-modal">
-  <div class="modal"><h3 id="modal-title">إضافة صنف</h3><input type="hidden" id="modal-item-id"><label>الفئة</label><select id="modal-cat" class="form-input"></select><label>صورة المنتج</label><input type="file" id="modal-image-file" accept="image/*"><div id="image-preview" style="width:80px;height:80px;margin-top:5px;border-radius:8px;overflow:hidden;display:none;"><img style="width:100%;height:100%;object-fit:cover;"></div><label>اسم الصنف</label><input id="modal-name" class="form-input"><label>الوصف</label><input id="modal-desc" class="form-input"><label>السعر الأساسي</label><div class="amount-with-currency"><input id="modal-price" type="number" class="form-input" style="width:auto;flex:1;"><select id="modal-price-currency" class="currency-select"><option value="SYP">ل.س</option><option value="USD">$</option><option value="TRY">₺</option></select></div><label style="margin-top:10px;">🧂 إضافات (سعر إضافي)</label><div id="addons-container"></div><button type="button" class="btn-sm" onclick="addAddonField()">+ إضافة إضافة</button><div style="display:flex;gap:10px;margin-top:16px;"><button class="btn-primary" onclick="saveItem()">حفظ</button><button class="btn-secondary" onclick="closeModal()">إلغاء</button></div></div>
+  <div class="modal"><h3 id="modal-title">إضافة صنف</h3><input type="hidden" id="modal-item-id"><label>الفئة</label><select id="modal-cat" class="form-input"></select><label>صورة المنتج</label><input type="file" id="modal-image-file" accept="image/*"><div id="image-preview" style="width:80px;height:80px;margin-top:5px;border-radius:8px;overflow:hidden;display:none;"><img style="width:100%;height:100%;object-fit:cover;"></div><label>اسم الصنف</label><input id="modal-name" class="form-input"><label>الوصف</label><input id="modal-desc" class="form-input"><div class="price-field-container"><label>السعر الأساسي</label><div class="amount-with-currency"><input id="modal-price" type="number" class="form-input" style="width:auto;flex:1;"><select id="modal-price-currency" class="currency-select"><option value="SYP">ل.س</option><option value="USD">$</option><option value="TRY">₺</option></select></div></div><label style="margin-top:10px;">🧂 إضافات (سعر إضافي)</label><div id="addons-container"></div><button type="button" class="btn-sm" onclick="addAddonField()">+ إضافة إضافة</button><div style="display:flex;gap:10px;margin-top:16px;"><button class="btn-primary" onclick="saveItem()">حفظ</button><button class="btn-secondary" onclick="closeModal()">إلغاء</button></div></div>
 </div>
 
 <!-- مودال اختيار الإضافات -->
@@ -228,11 +228,11 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
 </div>
 
 <script>
-// صورة افتراضية محلية
+// ========== الصور الافتراضية ==========
 const PLACEHOLDER_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='150' viewBox='0 0 400 150'%3E%3Crect width='400' height='150' fill='%232a2520'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23a09080' font-size='14' font-family='Cairo'%3E🖼️ لا توجد صورة%3C/text%3E%3C/svg%3E";
 const PLACEHOLDER_SMALL = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%232a2520'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23a09080' font-size='10' font-family='Cairo'%3E📷%3C/text%3E%3C/svg%3E";
 
-// البيانات الأساسية
+// ========== البيانات الأساسية ==========
 let CONFIG = {
   name: "مطعمي",
   whatsapp: "963912345678",
@@ -251,7 +251,7 @@ let activeCat = 0, activeCur = 'SYP', nameClickCount = 0;
 let currentProductModal = null;
 let currentOrderMethod = "dinein";
 
-// دوال العملات
+// ========== دوال العملات ==========
 function sypTo(amount,cur){ let r=CONFIG.rates; if(cur==='USD') return (amount/r.usd).toFixed(2); if(cur==='TRY') return (amount/r.try_rate).toFixed(1); return amount.toLocaleString(); }
 function curSymbol(cur){ return cur==='USD'?'$':cur==='TRY'?'₺':'ل.س جديدة'; }
 function fmt(priceSYP){ return sypTo(priceSYP,activeCur)+' '+curSymbol(activeCur); }
@@ -263,7 +263,7 @@ function getTotal(){ return Object.values(cart).reduce((s,i)=>s+i.totalPrice,0);
 function getTotalItems(){ return Object.values(cart).reduce((s,i)=>s+i.qty,0); }
 function updateFloat(){ let t=getTotalItems(), btn=document.getElementById('float-cart'); btn.style.display=t>0?'flex':'none'; document.getElementById('cart-count').innerText=t; document.getElementById('cart-total-float').innerText=fmt(getTotal()); }
 
-// حفظ واسترجاع البيانات
+// ========== حفظ واسترجاع البيانات ==========
 function loadAllData() {
   let savedConfig = localStorage.getItem('resto_config');
   if (savedConfig) CONFIG = JSON.parse(savedConfig);
@@ -286,7 +286,7 @@ function saveAllData() {
   localStorage.setItem('resto_orders', JSON.stringify(ORDERS));
 }
 
-// الإحصائيات والطلبات
+// ========== الإحصائيات والطلبات ==========
 function updateStats(){
   let today = new Date().toLocaleDateString('en-CA');
   let todayOrders = ORDERS.filter(o => o.date === today);
@@ -308,7 +308,7 @@ window.printOrder = function(order){
   w.document.close();
 };
 
-// بناء واجهة المستخدم
+// ========== بناء واجهة المستخدم ==========
 function buildPriceFilterOptions(){
   let filter = document.getElementById('price-filter'); if(!filter) return;
   let opts = [];
@@ -378,7 +378,7 @@ function buildMenu(){
   content.innerHTML = ''; content.appendChild(pageDiv); updateFloat();
 }
 
-// دوال السلة والمنتج
+// ========== دوال السلة والمنتج ==========
 function openProductModal(itemId){
   let item = MENU.flatMap(c=>c.items).find(i=>i.id==itemId);
   if(!item.available){ showToast('هذا المنتج غير متوفر حالياً'); return; }
@@ -429,7 +429,7 @@ function removeCartItem(key){ delete cart[key]; saveCartToLocal(); buildCart(); 
 function clearCart(){ cart={}; saveCartToLocal(); buildCart(); updateFloat(); showToast('تم مسح السلة'); }
 function saveCartToLocal(){ localStorage.setItem('saved_cart', JSON.stringify(cart)); }
 
-// طريقة الطلب وواتساب
+// ========== طريقة الطلب وواتساب ==========
 function selectOrderMethod(method){
   currentOrderMethod = method;
   document.querySelectorAll('.method-btn').forEach(btn => {
@@ -505,7 +505,7 @@ function goTo(id){
   window.scrollTo(0,0);
 }
 
-// لوحة الأدمن
+// ========== لوحة الأدمن (الجزء المعدل لحل مشكلة الأسعار) ==========
 function checkAdminPass(){
   if(document.getElementById('admin-pass').value === CONFIG.password){
     document.getElementById('pass-error').style.display='none';
@@ -679,8 +679,11 @@ function openAddItem(){
   document.getElementById('modal-name').value = '';
   document.getElementById('modal-desc').value = '';
   document.getElementById('modal-price').value = '';
-  document.getElementById('modal-price-currency').value = 'SYP';
-  document.getElementById('modal-price-currency').disabled = false; // تمكين العملة للإضافة
+  // تفعيل وإظهار خيار العملة للإضافة
+  const priceCurrencySelect = document.getElementById('modal-price-currency');
+  priceCurrencySelect.disabled = false;
+  priceCurrencySelect.style.display = 'inline-block';
+  document.querySelector('.price-field-container .currency-select').style.display = 'inline-block';
   document.getElementById('modal-image-file').value = '';
   document.getElementById('image-preview').style.display = 'none';
   document.getElementById('addons-container').innerHTML = '';
@@ -695,9 +698,12 @@ function openEditItem(id){
   document.getElementById('modal-item-id').value = id;
   document.getElementById('modal-name').value = item.name;
   document.getElementById('modal-desc').value = item.desc;
+  // عرض السعر المخزن (بالليرة السورية) فقط، وتعطيل خيار العملة
   document.getElementById('modal-price').value = item.price;
-  document.getElementById('modal-price-currency').value = 'SYP';
-  document.getElementById('modal-price-currency').disabled = true; // تعطيل العملة عند التعديل لتجنب المضاعفة
+  const priceCurrencySelect = document.getElementById('modal-price-currency');
+  priceCurrencySelect.disabled = true;
+  priceCurrencySelect.style.display = 'none';
+  document.querySelector('.price-field-container .currency-select').style.display = 'none';
   document.getElementById('modal-image-url').value = item.image || '';
   document.getElementById('modal-image-file').value = '';
   const previewDiv = document.getElementById('image-preview');
@@ -717,9 +723,12 @@ function saveItem(){
   let desc = document.getElementById('modal-desc').value.trim();
   let priceAmount = parseFloat(document.getElementById('modal-price').value) || 0;
   let priceCurrency = document.getElementById('modal-price-currency').value;
-  // إذا كان تعديل (id موجود) فإن العملة تكون SYP ولا نقوم بتحويل مرة أخرى
-  let priceSYP = (id && priceCurrency === 'SYP') ? priceAmount : convertToSYP(priceAmount, priceCurrency);
-  let imageUrl = document.getElementById('modal-image-url').value.trim();
+  // إذا كان التعديل (id موجود) فإن السعر مخزن بالفعل بالليرة السورية ولا نحتاج للتحويل
+  let priceSYP = priceAmount;
+  if (!id) {
+    // إضافة جديدة: نحول من العملة المختارة إلى الليرة السورية
+    priceSYP = convertToSYP(priceAmount, priceCurrency);
+  }
   let imageFile = document.getElementById('modal-image-file').files[0];
   let addons = collectAddonsFromUI();
   if(!name || priceSYP<=0){ showToast('❌ الاسم والسعر مطلوبان'); return; }
@@ -744,12 +753,13 @@ function saveItem(){
     reader.onload = function(e) { finish(e.target.result); };
     reader.readAsDataURL(imageFile);
   } else {
+    let imageUrl = document.getElementById('modal-image-url')?.value.trim() || '';
     finish(imageUrl);
   }
 }
 function closeModal(){ document.getElementById('item-modal').classList.remove('active'); }
 
-// معاينة الصور
+// ========== معاينة الصور ==========
 document.getElementById('new-cat-image')?.addEventListener('change', function(e){
   const file = e.target.files[0];
   if(file){
@@ -775,11 +785,11 @@ document.getElementById('cfg-logo-file')?.addEventListener('change', function(e)
   }
 });
 
-// بدء التطبيق
+// ========== بدء التطبيق ==========
 loadAllData();
 selectOrderMethod('dinein');
 
-// ربط الدوال العامة
+// ========== ربط الدوال العامة ==========
 window.setCurrency = setCurrency;
 window.goTo = goTo;
 window.checkAdminPass = checkAdminPass;
