@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
-/* الأنماط (نفسها) - تم تقليل طولها للاختصار ولكنها كاملة في الرد النهائي */
+/* جميع الأنماط كما هي (لن أكررها للاختصار، ولكنها موجودة في الكود النهائي) */
 :root{--gold:#c8963e;--gold-light:#e8b86d;--bg:#0f0e0d;--bg2:#1a1814;--bg3:#1e1c18;--border:#2e2b24;--text:#f5f0e8;--muted:#a09080;--dim:#7a7060;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direction:rtl;}
@@ -178,7 +178,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
   </div>
 
   <div class="admin-section"><div class="admin-section-title">📋 الطلبات المسجلة</div>
-    <div style="padding:12px;overflow-x:auto;"><table class="orders-table" id="orders-table"><thead> <th>#</th><th>العميل</th><th>المبلغ</th><th>التاريخ</th><th>طباعة</th> </thead><tbody id="orders-list"></tbody> <table></div>
+    <div style="padding:12px;overflow-x:auto;"><table class="orders-table" id="orders-table"><thead> <th>#</th><th>العميل</th><th>المبلغ</th><th>التاريخ</th><th>طباعة</th> </thead><tbody id="orders-list"></tbody> </table></div>
   </div>
 
   <div class="admin-section"><div class="admin-section-title">💱 أسعار الصرف</div>
@@ -228,15 +228,16 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ===================== إعدادات Supabase (استبدل بالقيم الصحيحة) =====================
-const SUPABASE_URL = "https://dasxvibcodvzisqbzzgw.supabase.co";  // ← الرابط الأساسي فقط
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhc3h2aWJjb2R2emlzcWJ6emd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNTkyODIsImV4cCI6MjA5NTYzNTI4Mn0.TWivD2fMFmxTf9mQj_jp6g5fksXaxgX0-evOFxCRWhk";  // ← مفتاح anon الصحيح
-
-// تهيئة Supabase (مرة واحدة فقط)
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// ===================== تجنب التصريح المزدوج لـ supabase =====================
+if (typeof window._supabaseClient === 'undefined') {
+  const SUPABASE_URL = "https://dasxvibcodvzisqbzzgw.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhc3h2aWJjb2R2emlzcWJ6emd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg0MDE2NzQsImV4cCI6MjA2Mzk3NzY3NH0.c6Rx3GX8QTpNDZX2TZlPqNafAw4xL9_9wjE6l6LgkQQ";
+  window._supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
+const supabase = window._supabaseClient;
 const RESTAURANT_ID = "restaurant_main";
 
-// ===================== المتغيرات العامة =====================
+// ===================== باقي الكود كما هو (لم يتغير) =====================
 let CONFIG = { name:"مطعمي", whatsapp:"963912345678", instagram:"", facebook:"", logo:"", deliveryFee:5000, password:"admin123", rates:{ usd:13000, try_rate:380 }, slides:[] };
 let MENU = [];
 let ORDERS = [];
@@ -245,7 +246,7 @@ let activeCat = 0, activeCur = 'SYP', nameClickCount = 0;
 let currentProductModal = null;
 let currentOrderMethod = "dinein";
 
-// ===================== دوال مساعدة =====================
+// دوال مساعدة
 function sypTo(amount,cur){ let r=CONFIG.rates; if(cur==='USD') return (amount/r.usd).toFixed(2); if(cur==='TRY') return (amount/r.try_rate).toFixed(1); return amount.toLocaleString(); }
 function curSymbol(cur){ return cur==='USD'?'$':cur==='TRY'?'₺':'ل.س جديدة'; }
 function fmt(priceSYP){ return sypTo(priceSYP,activeCur)+' '+curSymbol(activeCur); }
@@ -257,7 +258,7 @@ function getTotal(){ return Object.values(cart).reduce((s,i)=>s+i.totalPrice,0);
 function getTotalItems(){ return Object.values(cart).reduce((s,i)=>s+i.qty,0); }
 function updateFloat(){ let t=getTotalItems(), btn=document.getElementById('float-cart'); btn.style.display=t>0?'flex':'none'; document.getElementById('cart-count').innerText=t; document.getElementById('cart-total-float').innerText=fmt(getTotal()); }
 
-// ===================== تحميل وحفظ البيانات مع Real-time =====================
+// تحميل وحفظ البيانات
 async function loadConfig() {
   const { data, error } = await supabase
     .from('config')
@@ -278,7 +279,6 @@ async function loadConfig() {
       slides: data.slides || []
     };
   } else {
-    // إنشاء سجل افتراضي إذا لم يكن موجوداً
     await supabase.from('config').insert({
       restaurant_id: RESTAURANT_ID,
       name: CONFIG.name,
@@ -317,9 +317,7 @@ async function saveConfigToSupabase() {
 function subscribeToMenu() {
   supabase
     .channel('menu_changes')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'menu', filter: `restaurant_id=eq.${RESTAURANT_ID}` }, payload => {
-      loadMenu(); // إعادة تحميل القائمة عند أي تغيير
-    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'menu', filter: `restaurant_id=eq.${RESTAURANT_ID}` }, () => loadMenu())
     .subscribe();
 }
 
@@ -343,7 +341,6 @@ async function loadMenu() {
 }
 
 async function saveMenuToSupabase() {
-  // حذف السجلات القديمة ثم إدراج الجديدة
   await supabase.from('menu').delete().eq('restaurant_id', RESTAURANT_ID);
   if (MENU.length) {
     const toInsert = MENU.map(catObj => ({
@@ -359,9 +356,7 @@ async function saveMenuToSupabase() {
 function subscribeToOrders() {
   supabase
     .channel('orders_changes')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `restaurant_id=eq.${RESTAURANT_ID}` }, payload => {
-      loadOrders(); // تحديث قائمة الطلبات عند أي تغيير
-    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `restaurant_id=eq.${RESTAURANT_ID}` }, () => loadOrders())
     .subscribe();
 }
 
@@ -396,7 +391,7 @@ async function saveOrderToSupabase(order) {
   });
 }
 
-// ===================== الإحصائيات والطلبات =====================
+// الإحصائيات والطلبات
 function updateStats(){
   let today = new Date().toLocaleDateString('en-CA');
   let todayOrders = ORDERS.filter(o => o.date === today);
@@ -418,7 +413,7 @@ window.printOrder = function(order){
   w.document.close();
 };
 
-// ===================== بناء واجهة المستخدم =====================
+// بناء واجهة المستخدم
 function buildPriceFilterOptions(){
   let filter = document.getElementById('price-filter'); if(!filter) return;
   let opts = [];
@@ -469,7 +464,7 @@ function buildMenu(){
   content.innerHTML = ''; content.appendChild(pageDiv); updateFloat();
 }
 
-// ===================== دوال السلة والمنتج =====================
+// دوال السلة والمنتج
 function openProductModal(itemId){
   let item = MENU.flatMap(c=>c.items).find(i=>i.id==itemId);
   if(!item.available){ showToast('هذا المنتج غير متوفر حالياً'); return; }
@@ -519,7 +514,7 @@ function removeCartItem(key){ delete cart[key]; saveCartToLocal(); buildCart(); 
 function clearCart(){ cart={}; saveCartToLocal(); buildCart(); updateFloat(); showToast('تم مسح السلة'); }
 function saveCartToLocal(){ localStorage.setItem('saved_cart', JSON.stringify(cart)); }
 
-// ===================== طريقة الطلب وواتساب =====================
+// طريقة الطلب وواتساب
 function selectOrderMethod(method){
   currentOrderMethod = method;
   document.querySelectorAll('.method-btn').forEach(btn => {
@@ -583,7 +578,7 @@ function goTo(id){
   window.scrollTo(0,0);
 }
 
-// ===================== لوحة الأدمن =====================
+// لوحة الأدمن
 function checkAdminPass(){
   if(document.getElementById('admin-pass').value === CONFIG.password){
     document.getElementById('pass-error').style.display='none';
@@ -849,7 +844,7 @@ document.getElementById('cfg-logo-file')?.addEventListener('change', function(e)
   }
 });
 
-// ===================== بدء التطبيق مع الاشتراك في التحديثات =====================
+// بدء التطبيق
 async function init() {
   await loadConfig();
   await loadMenu();
