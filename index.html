@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>نظام طلب المطعم - سحابي متكامل</title>
+<title>نظام طلب المطعم - نسخة مستقلة</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
-/* جميع الأنماط كما هي (لن أكررها للاختصار، ولكنها موجودة في الكود النهائي) */
+/* ========== الأنماط الأساسية ========== */
 :root{--gold:#c8963e;--gold-light:#e8b86d;--bg:#0f0e0d;--bg2:#1a1814;--bg3:#1e1c18;--border:#2e2b24;--text:#f5f0e8;--muted:#a09080;--dim:#7a7060;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direction:rtl;}
@@ -98,6 +98,8 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
 .method-btn{flex:1;padding:10px;border-radius:30px;border:1px solid var(--border);background:var(--bg2);color:var(--muted);cursor:pointer;text-align:center;font-weight:700;}
 .method-btn.active{background:var(--gold);color:#1a1208;border-color:var(--gold);}
 .dynamic-field{margin-top:8px;}
+.export-import{display:flex;gap:10px;margin-bottom:16px;justify-content:center;}
+.export-btn,.import-btn{background:#2a2520;border:1px solid var(--border);border-radius:30px;padding:8px 16px;color:var(--text);cursor:pointer;font-size:12px;}
 </style>
 </head>
 <body>
@@ -169,6 +171,12 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
   <div style="background:linear-gradient(135deg,#c8963e,#e8b86d);padding:18px;"><h2 style="color:#1a1208;">⚙️ إدارة المطعم</h2></div>
   <button class="back-btn" onclick="goTo('page-menu')">← العودة للمنيو</button>
   
+  <div class="export-import">
+    <button class="export-btn" onclick="exportData()">📤 تصدير البيانات (نسخة احتياطية)</button>
+    <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importData(this)">
+    <button class="import-btn" onclick="document.getElementById('import-file').click()">📥 استيراد البيانات</button>
+  </div>
+
   <div class="admin-section"><div class="admin-section-title">📊 إحصائيات المبيعات</div>
     <div class="stats-box" style="padding:12px;">
       <div class="stats-card"><div class="number" id="today-orders">0</div><div>طلبات اليوم</div></div>
@@ -226,27 +234,82 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
   <button class="nav-btn" onclick="goTo('page-admin-login')">🔑<span>أدمن</span></button>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ===================== تجنب التصريح المزدوج لـ supabase =====================
-if (typeof window._supabaseClient === 'undefined') {
-  const SUPABASE_URL = "https://dasxvibcodvzisqbzzgw.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhc3h2aWJjb2R2emlzcWJ6emd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg0MDE2NzQsImV4cCI6MjA2Mzk3NzY3NH0.c6Rx3GX8QTpNDZX2TZlPqNafAw4xL9_9wjE6l6LgkQQ";
-  window._supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-}
-//const supabase = window._supabaseClient;
-const RESTAURANT_ID = "restaurant_main";
-
-// ===================== باقي الكود كما هو (لم يتغير) =====================
-let CONFIG = { name:"مطعمي", whatsapp:"963912345678", instagram:"", facebook:"", logo:"", deliveryFee:5000, password:"admin123", rates:{ usd:13000, try_rate:380 }, slides:[] };
-let MENU = [];
+// ===================== البيانات والتخزين المحلي =====================
+let CONFIG = {
+  name: "مطعمي",
+  whatsapp: "963912345678",
+  instagram: "",
+  facebook: "",
+  logo: "",
+  deliveryFee: 5000,
+  password: "admin123",
+  rates: { usd: 13000, try_rate: 380 },
+  slides: []
+};
+let MENU = [{ cat: "الرئيسية", image: "", items: [] }];
 let ORDERS = [];
 let cart = JSON.parse(localStorage.getItem('saved_cart') || '{}');
 let activeCat = 0, activeCur = 'SYP', nameClickCount = 0;
 let currentProductModal = null;
 let currentOrderMethod = "dinein";
 
-// دوال مساعدة
+// تحميل البيانات من localStorage
+function loadAllData() {
+  let savedConfig = localStorage.getItem('resto_config');
+  if (savedConfig) CONFIG = JSON.parse(savedConfig);
+  let savedMenu = localStorage.getItem('resto_menu');
+  if (savedMenu) MENU = JSON.parse(savedMenu);
+  let savedOrders = localStorage.getItem('resto_orders');
+  if (savedOrders) ORDERS = JSON.parse(savedOrders);
+  
+  document.getElementById('rest-name-display').innerText = CONFIG.name;
+  buildRatesBanner();
+  buildPriceFilterOptions();
+  updateStats();
+  loadOrdersTable();
+  if (document.getElementById('page-menu').classList.contains('active')) buildMenu();
+  if (document.getElementById('page-cart').classList.contains('active')) buildCart();
+  if (document.getElementById('page-admin').classList.contains('active')) loadAdminPanel();
+}
+function saveAllData() {
+  localStorage.setItem('resto_config', JSON.stringify(CONFIG));
+  localStorage.setItem('resto_menu', JSON.stringify(MENU));
+  localStorage.setItem('resto_orders', JSON.stringify(ORDERS));
+}
+
+// تصدير واستيراد البيانات
+function exportData() {
+  let data = { config: CONFIG, menu: MENU, orders: ORDERS };
+  let blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
+  let url = URL.createObjectURL(blob);
+  let a = document.createElement('a');
+  a.href = url;
+  a.download = `restaurant_backup_${new Date().toISOString().slice(0,19)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast("✅ تم تصدير البيانات");
+}
+function importData(input) {
+  let file = input.files[0];
+  if (!file) return;
+  let reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      let data = JSON.parse(e.target.result);
+      if (data.config) CONFIG = data.config;
+      if (data.menu) MENU = data.menu;
+      if (data.orders) ORDERS = data.orders;
+      saveAllData();
+      loadAllData();
+      showToast("✅ تم استيراد البيانات بنجاح");
+    } catch(err) { showToast("❌ ملف غير صالح"); }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+// ===================== دوال العملات =====================
 function sypTo(amount,cur){ let r=CONFIG.rates; if(cur==='USD') return (amount/r.usd).toFixed(2); if(cur==='TRY') return (amount/r.try_rate).toFixed(1); return amount.toLocaleString(); }
 function curSymbol(cur){ return cur==='USD'?'$':cur==='TRY'?'₺':'ل.س جديدة'; }
 function fmt(priceSYP){ return sypTo(priceSYP,activeCur)+' '+curSymbol(activeCur); }
@@ -258,140 +321,7 @@ function getTotal(){ return Object.values(cart).reduce((s,i)=>s+i.totalPrice,0);
 function getTotalItems(){ return Object.values(cart).reduce((s,i)=>s+i.qty,0); }
 function updateFloat(){ let t=getTotalItems(), btn=document.getElementById('float-cart'); btn.style.display=t>0?'flex':'none'; document.getElementById('cart-count').innerText=t; document.getElementById('cart-total-float').innerText=fmt(getTotal()); }
 
-// تحميل وحفظ البيانات
-async function loadConfig() {
-  const { data, error } = await supabase
-    .from('config')
-    .select('*')
-    .eq('restaurant_id', RESTAURANT_ID)
-    .maybeSingle();
-  if (error) console.error(error);
-  if (data) {
-    CONFIG = {
-      name: data.name,
-      whatsapp: data.whatsapp,
-      instagram: data.instagram || '',
-      facebook: data.facebook || '',
-      logo: data.logo || '',
-      deliveryFee: data.delivery_fee || 0,
-      password: data.password || 'admin123',
-      rates: { usd: data.rates_usd || 13000, try_rate: data.rates_try || 380 },
-      slides: data.slides || []
-    };
-  } else {
-    await supabase.from('config').insert({
-      restaurant_id: RESTAURANT_ID,
-      name: CONFIG.name,
-      whatsapp: CONFIG.whatsapp,
-      delivery_fee: CONFIG.deliveryFee,
-      password: CONFIG.password,
-      rates_usd: CONFIG.rates.usd,
-      rates_try: CONFIG.rates.try_rate,
-      slides: []
-    });
-  }
-  document.getElementById('rest-name-display').innerText = CONFIG.name;
-  buildRatesBanner();
-  buildPriceFilterOptions();
-  if(document.getElementById('page-menu').classList.contains('active')) buildMenu();
-  if(document.getElementById('page-cart').classList.contains('active')) buildCart();
-}
-
-async function saveConfigToSupabase() {
-  await supabase.from('config').upsert({
-    restaurant_id: RESTAURANT_ID,
-    name: CONFIG.name,
-    whatsapp: CONFIG.whatsapp,
-    instagram: CONFIG.instagram,
-    facebook: CONFIG.facebook,
-    logo: CONFIG.logo,
-    delivery_fee: CONFIG.deliveryFee,
-    password: CONFIG.password,
-    rates_usd: CONFIG.rates.usd,
-    rates_try: CONFIG.rates.try_rate,
-    slides: CONFIG.slides,
-    updated_at: new Date()
-  });
-}
-
-function subscribeToMenu() {
-  supabase
-    .channel('menu_changes')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'menu', filter: `restaurant_id=eq.${RESTAURANT_ID}` }, () => loadMenu())
-    .subscribe();
-}
-
-async function loadMenu() {
-  const { data, error } = await supabase
-    .from('menu')
-    .select('*')
-    .eq('restaurant_id', RESTAURANT_ID);
-  if (error) console.error(error);
-  if (data && data.length) {
-    MENU = data.map(row => ({
-      cat: row.cat,
-      image: row.cat_image || '',
-      items: row.items || []
-    }));
-  } else {
-    MENU = [{ cat: "الرئيسية", image: "", items: [] }];
-  }
-  buildMenu();
-  if (document.getElementById('page-admin').classList.contains('active')) loadAdminPanel();
-}
-
-async function saveMenuToSupabase() {
-  await supabase.from('menu').delete().eq('restaurant_id', RESTAURANT_ID);
-  if (MENU.length) {
-    const toInsert = MENU.map(catObj => ({
-      restaurant_id: RESTAURANT_ID,
-      cat: catObj.cat,
-      cat_image: catObj.image || '',
-      items: catObj.items
-    }));
-    await supabase.from('menu').insert(toInsert);
-  }
-}
-
-function subscribeToOrders() {
-  supabase
-    .channel('orders_changes')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `restaurant_id=eq.${RESTAURANT_ID}` }, () => loadOrders())
-    .subscribe();
-}
-
-async function loadOrders() {
-  const { data, error } = await supabase
-    .from('orders')
-    .select('*')
-    .eq('restaurant_id', RESTAURANT_ID)
-    .order('date_time', { ascending: false });
-  if (error) console.error(error);
-  if (data) ORDERS = data;
-  updateStats();
-  loadOrdersTable();
-}
-
-async function saveOrderToSupabase(order) {
-  await supabase.from('orders').insert({
-    restaurant_id: RESTAURANT_ID,
-    customer: order.customer,
-    address: order.address,
-    method: order.method,
-    table_num: order.table,
-    delivery_time: order.deliveryTime,
-    pickup_time: order.pickupTime,
-    items: order.items,
-    subtotal: order.subtotal,
-    delivery_fee: order.delivery,
-    total: order.total,
-    note: order.note,
-    date: order.date,
-    date_time: order.dateTime
-  });
-}
-
-// الإحصائيات والطلبات
+// ===================== الإحصائيات والطلبات =====================
 function updateStats(){
   let today = new Date().toLocaleDateString('en-CA');
   let todayOrders = ORDERS.filter(o => o.date === today);
@@ -402,7 +332,7 @@ function updateStats(){
 }
 function loadOrdersTable(){
   let tbody = document.getElementById('orders-list'); tbody.innerHTML = '';
-  ORDERS.forEach((order, idx) => {
+  ORDERS.slice().reverse().forEach((order, idx) => {
     tbody.innerHTML += `<tr><td>${idx+1}</td><td>${order.customer}</td><td>${order.total.toLocaleString()} ل.س</td><td>${order.date}</td><td><button class="print-btn" onclick='window.printOrder(${JSON.stringify(order).replace(/'/g, "\\'")})'>🖨️ طباعة</button></td></tr>`;
   });
 }
@@ -413,7 +343,7 @@ window.printOrder = function(order){
   w.document.close();
 };
 
-// بناء واجهة المستخدم
+// ===================== بناء واجهة المستخدم =====================
 function buildPriceFilterOptions(){
   let filter = document.getElementById('price-filter'); if(!filter) return;
   let opts = [];
@@ -464,7 +394,7 @@ function buildMenu(){
   content.innerHTML = ''; content.appendChild(pageDiv); updateFloat();
 }
 
-// دوال السلة والمنتج
+// ===================== دوال السلة والمنتج =====================
 function openProductModal(itemId){
   let item = MENU.flatMap(c=>c.items).find(i=>i.id==itemId);
   if(!item.available){ showToast('هذا المنتج غير متوفر حالياً'); return; }
@@ -514,7 +444,7 @@ function removeCartItem(key){ delete cart[key]; saveCartToLocal(); buildCart(); 
 function clearCart(){ cart={}; saveCartToLocal(); buildCart(); updateFloat(); showToast('تم مسح السلة'); }
 function saveCartToLocal(){ localStorage.setItem('saved_cart', JSON.stringify(cart)); }
 
-// طريقة الطلب وواتساب
+// ===================== طريقة الطلب وواتساب =====================
 function selectOrderMethod(method){
   currentOrderMethod = method;
   document.querySelectorAll('.method-btn').forEach(btn => {
@@ -560,13 +490,25 @@ function sendWhatsApp(){
   msg += `\n🕐 ${new Date().toLocaleTimeString('en-GB')}`;
   window.open(`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(msg)}`,'_blank');
   let orderRecord = {
-    customer: name, address: address, method: method, table: table,
-    deliveryTime: deliveryTime, pickupTime: pickupTime,
+    id: Date.now(),
+    customer: name,
+    address: address,
+    method: method,
+    table_num: table,
+    delivery_time: deliveryTime,
+    pickup_time: pickupTime,
     items: Object.values(cart).map(i=>({name:i.name, qty:i.qty, totalPrice:i.totalPrice})),
-    subtotal: subtotal, delivery: delivery, total: total, note: note,
-    date: new Date().toLocaleDateString('en-CA'), dateTime: new Date().toISOString()
+    subtotal: subtotal,
+    delivery_fee: delivery,
+    total: total,
+    note: note,
+    date: new Date().toLocaleDateString('en-CA'),
+    dateTime: new Date().toLocaleString()
   };
-  saveOrderToSupabase(orderRecord);
+  ORDERS.push(orderRecord);
+  saveAllData();
+  updateStats();
+  loadOrdersTable();
   cart={}; saveCartToLocal(); buildCart(); updateFloat(); goTo('page-menu'); showToast('تم إرسال الطلب، سيفتح واتساب');
 }
 function goTo(id){
@@ -578,7 +520,7 @@ function goTo(id){
   window.scrollTo(0,0);
 }
 
-// لوحة الأدمن
+// ===================== لوحة الأدمن =====================
 function checkAdminPass(){
   if(document.getElementById('admin-pass').value === CONFIG.password){
     document.getElementById('pass-error').style.display='none';
@@ -590,7 +532,6 @@ function checkAdminPass(){
   }
 }
 function loadAdminPanel(){
-  if (!MENU) MENU = [];
   document.getElementById('cfg-name').value = CONFIG.name;
   document.getElementById('cfg-whatsapp').value = CONFIG.whatsapp;
   document.getElementById('cfg-instagram').value = CONFIG.instagram||'';
@@ -615,18 +556,18 @@ function loadAdminPanel(){
   buildGalleryPreview();
   updateStats(); loadOrdersTable();
 }
-async function toggleAvailability(id){
+function toggleAvailability(id){
   let item = MENU.flatMap(c=>c.items).find(i=>i.id==id);
-  if(item){ item.available = !item.available; await saveMenuToSupabase(); buildMenu(); loadAdminPanel(); showToast(item.available?'تم التفعيل':'تم التعطيل'); }
+  if(item){ item.available = !item.available; saveAllData(); buildMenu(); loadAdminPanel(); showToast(item.available?'تم التفعيل':'تم التعطيل'); }
 }
-async function saveRates(){
+function saveRates(){
   CONFIG.rates.usd = parseFloat(document.getElementById('rate-usd').value);
   CONFIG.rates.try_rate = parseFloat(document.getElementById('rate-try').value);
-  await saveConfigToSupabase();
+  saveAllData();
   buildRatesBanner();
   showToast('✅ تم تحديث أسعار الصرف');
 }
-async function saveConfig(){
+function saveConfig(){
   CONFIG.name = document.getElementById('cfg-name').value;
   CONFIG.whatsapp = document.getElementById('cfg-whatsapp').value;
   CONFIG.instagram = document.getElementById('cfg-instagram').value;
@@ -641,14 +582,13 @@ async function saveConfig(){
     const reader = new FileReader();
     reader.onload = function(e) {
       CONFIG.logo = e.target.result;
-      saveConfigToSupabase().then(()=>{
-        loadAdminPanel(); buildMenu();
-        showToast('✅ تم حفظ الإعدادات والشعار');
-      });
+      saveAllData();
+      loadAdminPanel(); buildMenu();
+      showToast('✅ تم حفظ الإعدادات والشعار');
     };
     reader.readAsDataURL(logoFile);
   } else {
-    await saveConfigToSupabase();
+    saveAllData();
     loadAdminPanel(); buildMenu();
     showToast('✅ تم حفظ الإعدادات');
   }
@@ -663,39 +603,36 @@ function buildGalleryPreview(){
     container.appendChild(div);
   });
 }
-async function uploadGalleryImages(){
+function uploadGalleryImages(){
   let files = document.getElementById('gallery-files').files;
   for(let file of files){
     const reader = new FileReader();
-    await new Promise((resolve) => {
-      reader.onload = async function(e) {
-        const base64 = e.target.result;
-        if(!CONFIG.slides) CONFIG.slides = [];
-        CONFIG.slides.push(base64);
-        resolve();
-      };
-      reader.readAsDataURL(file);
-    });
+    reader.onload = function(e) {
+      const base64 = e.target.result;
+      if(!CONFIG.slides) CONFIG.slides = [];
+      CONFIG.slides.push(base64);
+      saveAllData();
+      buildSlider();
+      buildGalleryPreview();
+    };
+    reader.readAsDataURL(file);
   }
-  await saveConfigToSupabase();
-  buildSlider();
-  buildGalleryPreview();
   showToast('✅ تمت إضافة الصور');
 }
-async function removeGalleryImage(idx){
+function removeGalleryImage(idx){
   CONFIG.slides.splice(idx,1);
-  await saveConfigToSupabase();
+  saveAllData();
   buildSlider();
   buildGalleryPreview();
 }
-async function addCategory() {
+function addCategory() {
   let name = document.getElementById('new-cat-name').value.trim();
   if (!name) { showToast('❌ أدخل اسم الفئة'); return; }
   let imageFile = document.getElementById('new-cat-image').files[0];
   let imageBase64 = '';
-  const finish = async () => {
+  const finish = () => {
     MENU.push({ cat: name, image: imageBase64, items: [] });
-    await saveMenuToSupabase();
+    saveAllData();
     loadAdminPanel();
     buildMenu();
     document.getElementById('new-cat-name').value = '';
@@ -705,25 +642,25 @@ async function addCategory() {
   };
   if (imageFile) {
     const reader = new FileReader();
-    reader.onload = async function(e) { imageBase64 = e.target.result; await finish(); };
+    reader.onload = function(e) { imageBase64 = e.target.result; finish(); };
     reader.readAsDataURL(imageFile);
   } else {
-    await finish();
+    finish();
   }
 }
-async function deleteCat(ci){
+function deleteCat(ci){
   if(!confirm('حذف هذه الفئة وكل عناصرها؟')) return;
   MENU.splice(ci,1);
   if(activeCat >= MENU.length) activeCat = 0;
-  await saveMenuToSupabase();
+  saveAllData();
   buildMenu();
   loadAdminPanel();
   showToast('✅ تم الحذف');
 }
-async function deleteItem(id){
+function deleteItem(id){
   if(!confirm('حذف هذا الصنف؟')) return;
   for(let cat of MENU) cat.items = cat.items.filter(i => i.id !== id);
-  await saveMenuToSupabase();
+  saveAllData();
   buildMenu();
   loadAdminPanel();
   showToast('✅ تم الحذف');
@@ -781,7 +718,7 @@ function openEditItem(id){
   sel.innerHTML = MENU.map((c,i)=>`<option value="${i}" ${i===ci?'selected':''}>${c.cat}</option>`).join('');
   document.getElementById('item-modal').classList.add('active');
 }
-async function saveItem(){
+function saveItem(){
   let id = document.getElementById('modal-item-id').value;
   let catIdx = parseInt(document.getElementById('modal-cat').value);
   let name = document.getElementById('modal-name').value.trim();
@@ -792,7 +729,7 @@ async function saveItem(){
   let imageFile = document.getElementById('modal-image-file').files[0];
   let addons = collectAddonsFromUI();
   if(!name || priceSYP<=0){ showToast('❌ الاسم والسعر مطلوبان'); return; }
-  const finish = async (finalImage) => {
+  const finish = (finalImage) => {
     if(id){
       let item = MENU.flatMap(c=>c.items).find(i=>i.id==id);
       if(item){
@@ -802,7 +739,7 @@ async function saveItem(){
       let newId = Date.now();
       MENU[catIdx].items.push({ id:newId, name, desc, price:priceSYP, image:finalImage, addons, available:true });
     }
-    await saveMenuToSupabase();
+    saveAllData();
     loadAdminPanel();
     buildMenu();
     closeModal();
@@ -845,15 +782,8 @@ document.getElementById('cfg-logo-file')?.addEventListener('change', function(e)
 });
 
 // بدء التطبيق
-async function init() {
-  await loadConfig();
-  await loadMenu();
-  await loadOrders();
-  subscribeToMenu();
-  subscribeToOrders();
-  selectOrderMethod('dinein');
-}
-init();
+loadAllData();
+selectOrderMethod('dinein');
 
 // ربط الدوال العامة
 window.setCurrency = setCurrency;
@@ -879,6 +809,7 @@ window.clearCart = clearCart;
 window.sendWhatsApp = sendWhatsApp;
 window.toggleAvailability = toggleAvailability;
 window.selectOrderMethod = selectOrderMethod;
+window.exportData = exportData;
 </script>
 </body>
 </html>
