@@ -225,8 +225,8 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ===================== إعدادات Supabase (استبدل بالقيم الصحيحة) =====================
-const SUPABASE_URL = "https://dasxvibcodvzisqbzzgw.supabase.co";  // ← الرابط الأساسي فقط
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhc3h2aWJjb2R2emlzcWJ6emd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg0MDE2NzQsImV4cCI6MjA2Mzk3NzY3NH0.c6Rx3GX8QTpNDZX2TZlPqNafAw4xL9_9wjE6l6LgkQQ";  // ← مفتاح anon الصحيح
+const SUPABASE_URL = "https://dasxvibcodvzisqbzzgw.supabase.co/";  // ← الرابط الأساسي فقط
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhc3h2aWJjb2R2emlzcWJ6emd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNTkyODIsImV4cCI6MjA5NTYzNTI4Mn0.TWivD2fMFmxTf9mQj_jp6g5fksXaxgX0-evOFxCRWhk";  // ← مفتاح anon الصحيح
 
 // تهيئة Supabase (مرة واحدة فقط)
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
