@@ -135,7 +135,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
   <div style="background:linear-gradient(135deg,#c8963e,#e8b86d);padding:18px;"><h2 style="color:#1a1208;">🛒 سلة الطلبات</h2><p id="cart-cur-label"></p></div>
   <button class="back-btn" onclick="goTo('page-menu')">← إضافة المزيد</button>
   <div class="form-wrap">
-    <label class="form-label">👤 الاسم</label><input class="form-input" id="customer-name">
+    <label class="form-label" style="color:var(--gold);">👤 الاسم <span style="color:#f87171;">*</span></label><input class="form-input" id="customer-name" required>
     
     <!-- حقل العنوان (يظهر فقط عند اختيار توصيل) -->
     <div id="address-field-container" style="display:none;">
@@ -404,6 +404,10 @@ function selectOrderMethod(method) {
 function sendWhatsApp(){
     if(Object.keys(cart).length===0){ showToast('السلة فارغة'); return; }
     let name = document.getElementById('customer-name').value.trim();
+  if(!name){
+    showToast('❌ الاسم مطلوب');
+    return;
+}
     let method = currentOrderMethod;
     let address = '';
     if(method === 'delivery') {
