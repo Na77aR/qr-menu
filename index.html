@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
-/* ========== جميع الأنماط السابقة مع تعديل أزرار الفئات ========== */
+/* ========== جميع الأنماط السابقة ========== */
 :root{--gold:#c8963e;--gold-light:#e8b86d;--bg:#0f0e0d;--bg2:#1a1814;--bg3:#1e1c18;--border:#2e2b24;--text:#f5f0e8;--muted:#a09080;--dim:#7a7060;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direction:rtl;}
@@ -33,7 +33,6 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
 .hero-slide.active{opacity:1;}
 .hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.6),rgba(0,0,0,.1));}
 .rates-banner{background:#1a1814;border-bottom:1px solid var(--border);padding:8px 16px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap;font-size:12px;}
-/* شريط الفئات المعدل */
 .cat-bar{display:flex;gap:12px;padding:10px 16px;overflow-x:auto;background:var(--bg2);scrollbar-width:none;}
 .cat-bar::-webkit-scrollbar{display:none;}
 .cat-btn{position:relative;min-width:100px;height:100px;border-radius:16px;border:none;cursor:pointer;background-size:cover;background-position:center;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px;transition:0.2s;}
@@ -229,6 +228,10 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
 </div>
 
 <script>
+// ===================== صورة افتراضية محلية (بديل placeholder.com) =====================
+const PLACEHOLDER_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='150' viewBox='0 0 400 150'%3E%3Crect width='400' height='150' fill='%232a2520'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23a09080' font-size='14' font-family='Cairo'%3E🖼️ لا توجد صورة%3C/text%3E%3C/svg%3E";
+const PLACEHOLDER_SMALL = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%232a2520'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23a09080' font-size='10' font-family='Cairo'%3E📷%3C/text%3E%3C/svg%3E";
+
 // ===================== الإعدادات الافتراضية =====================
 let CONFIG = {
   name: "مطعمي",
@@ -327,7 +330,7 @@ function buildRatesBanner(){
 function buildMenu(){
   if (!MENU || !MENU.length) return;
   document.getElementById('rest-name-display').innerText = CONFIG.name;
-  // الضغط 5 مرات على اسم المطعم لفتح الأدمن (بدون زر أدمن في الأسفل)
+  // الضغط 5 مرات على اسم المطعم لفتح الأدمن
   const nameEl = document.getElementById('rest-name-display');
   nameEl.onclick = (e) => { 
     e.stopPropagation(); 
@@ -350,7 +353,6 @@ function buildMenu(){
   MENU.forEach((cat, ci) => {
     let btn = document.createElement('button');
     btn.className = 'cat-btn' + (ci===activeCat ? ' active' : '');
-    // تعيين صورة الفئة كخلفية للزر
     if (cat.image && cat.image.trim() !== '') {
       btn.style.backgroundImage = `url('${cat.image}')`;
     } else {
@@ -358,7 +360,6 @@ function buildMenu(){
     }
     btn.style.backgroundSize = 'cover';
     btn.style.backgroundPosition = 'center';
-    // إضافة اسم الفئة داخل span فوق الصورة
     let span = document.createElement('span');
     span.innerText = cat.cat;
     btn.appendChild(span);
@@ -372,20 +373,20 @@ function buildMenu(){
   let currentCat = MENU[activeCat] || {cat:"الرئيسية", items:[]};
   pageDiv.innerHTML = `<div class="section-title">${currentCat.image ? `<img src="${currentCat.image}">` : ''} ${currentCat.cat}</div>`;
   (currentCat.items || []).filter(item => item.name.toLowerCase().includes(searchTerm) && (maxPrice==='all' || item.price<=priceLimit)).forEach(item => {
-    const imgSrc = item.image && item.image.trim() ? item.image : 'https://via.placeholder.com/400x150?text=No+Image';
-    pageDiv.innerHTML += `<div class="item-card"><img class="item-img" src="${imgSrc}" onerror="this.src='https://via.placeholder.com/400x150?text=No+Image'"><div class="item-info"><div class="item-name"><span>${item.name}</span><span class="item-price">${fmt(item.price)}</span></div><div class="item-desc">${item.desc}</div><div class="item-footer"><button class="btn-order" onclick="openProductModal(${item.id})">🛒 طلب</button>${!item.available?'<span class="unavailable-badge">غير متوفر</span>':''}</div></div></div>`;
+    const imgSrc = (item.image && item.image.trim()) ? item.image : PLACEHOLDER_IMG;
+    pageDiv.innerHTML += `<div class="item-card"><img class="item-img" src="${imgSrc}" onerror="this.src='${PLACEHOLDER_IMG}'"><div class="item-info"><div class="item-name"><span>${item.name}</span><span class="item-price">${fmt(item.price)}</span></div><div class="item-desc">${item.desc}</div><div class="item-footer"><button class="btn-order" onclick="openProductModal(${item.id})">🛒 طلب</button>${!item.available?'<span class="unavailable-badge">غير متوفر</span>':''}</div></div></div>`;
   });
   content.innerHTML = ''; content.appendChild(pageDiv); updateFloat();
 }
 
-// ===================== دوال السلة والمنتج ===================== (نفسها تماماً لم تتغير)
+// ===================== دوال السلة والمنتج =====================
 function openProductModal(itemId){
   let item = MENU.flatMap(c=>c.items).find(i=>i.id==itemId);
   if(!item.available){ showToast('هذا المنتج غير متوفر حالياً'); return; }
   document.getElementById('product-modal-name').innerText = item.name;
   const imgEl = document.getElementById('product-modal-img');
-  imgEl.src = (item.image && item.image.trim()) ? item.image : 'https://via.placeholder.com/400x150?text=No+Image';
-  imgEl.onerror = () => { imgEl.src = 'https://via.placeholder.com/400x150?text=No+Image'; };
+  imgEl.src = (item.image && item.image.trim()) ? item.image : PLACEHOLDER_IMG;
+  imgEl.onerror = () => { imgEl.src = PLACEHOLDER_IMG; };
   document.getElementById('product-modal-desc').innerText = item.desc;
   document.getElementById('product-modal-price').innerHTML = `<strong>السعر الأساسي:</strong> ${fmt(item.price)}`;
   let addonsDiv = document.getElementById('product-addons'); addonsDiv.innerHTML = '';
@@ -414,7 +415,8 @@ function buildCart(){
   list.innerHTML = '';
   Object.values(cart).forEach(citem => {
     subtotal += citem.totalPrice;
-    list.innerHTML += `<div class="cart-item"><img class="cart-item-img" src="${citem.image || 'https://via.placeholder.com/50'}" onerror="this.src='https://via.placeholder.com/50'"><div style="flex:1;"><div><strong>${citem.name}</strong> x${citem.qty}</div><div style="font-size:11px;">${citem.addonsSelected?.join(', ') || ''}</div><div>${fmt(citem.totalPrice)}</div></div><button class="btn-danger" onclick="removeCartItem('${Object.keys(cart).find(k=>cart[k]===citem)}')">حذف</button></div>`;
+    const imgSrc = (citem.image && citem.image.trim()) ? citem.image : PLACEHOLDER_SMALL;
+    list.innerHTML += `<div class="cart-item"><img class="cart-item-img" src="${imgSrc}" onerror="this.src='${PLACEHOLDER_SMALL}'"><div style="flex:1;"><div><strong>${citem.name}</strong> x${citem.qty}</div><div style="font-size:11px;">${citem.addonsSelected?.join(', ') || ''}</div><div>${fmt(citem.totalPrice)}</div></div><button class="btn-danger" onclick="removeCartItem('${Object.keys(cart).find(k=>cart[k]===citem)}')">حذف</button></div>`;
   });
   let delivery = CONFIG.deliveryFee || 0;
   let total = subtotal + delivery;
@@ -504,7 +506,7 @@ function goTo(id){
   window.scrollTo(0,0);
 }
 
-// ===================== لوحة الأدمن ===================== (نفسها)
+// ===================== لوحة الأدمن =====================
 function checkAdminPass(){
   if(document.getElementById('admin-pass').value === CONFIG.password){
     document.getElementById('pass-error').style.display='none';
@@ -534,7 +536,8 @@ function loadAdminPanel(){
   MENU.forEach((cat, ci) => {
     listDiv.innerHTML += `<div style="background:#1f1c18;padding:8px;display:flex;justify-content:space-between;align-items:center;"><div>${cat.image ? `<img src="${cat.image}" style="width:30px;height:30px;border-radius:6px;margin-left:5px;">` : ''} ${cat.cat}</div><button class="btn-danger" onclick="deleteCat(${ci})">حذف الفئة</button></div>`;
     (cat.items || []).forEach(item => {
-      listDiv.innerHTML += `<div class="admin-item"><img class="admin-item-img" src="${item.image || 'https://via.placeholder.com/40'}" onerror="this.src='https://via.placeholder.com/40'"><div style="flex:1;"><div><strong>${item.name}</strong></div><div>${fmtSYP(item.price)}</div><div>${item.available?'✅ متوفر':'❌ غير متوفر'}</div><div>${item.addons?.length||0} إضافة</div></div><button class="btn-sm" onclick="openEditItem(${item.id})">تعديل</button><button class="btn-danger" onclick="deleteItem(${item.id})">حذف</button><button class="btn-sm" onclick="toggleAvailability(${item.id})">تبديل</button></div>`;
+      const imgSrc = (item.image && item.image.trim()) ? item.image : PLACEHOLDER_SMALL;
+      listDiv.innerHTML += `<div class="admin-item"><img class="admin-item-img" src="${imgSrc}" onerror="this.src='${PLACEHOLDER_SMALL}'"><div style="flex:1;"><div><strong>${item.name}</strong></div><div>${fmtSYP(item.price)}</div><div>${item.available?'✅ متوفر':'❌ غير متوفر'}</div><div>${item.addons?.length||0} إضافة</div></div><button class="btn-sm" onclick="openEditItem(${item.id})">تعديل</button><button class="btn-danger" onclick="deleteItem(${item.id})">حذف</button><button class="btn-sm" onclick="toggleAvailability(${item.id})">تبديل</button></div>`;
     });
   });
   buildGalleryPreview();
