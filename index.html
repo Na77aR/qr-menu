@@ -177,7 +177,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
   </div>
 
   <div class="admin-section"><div class="admin-section-title">📋 الطلبات المسجلة</div>
-    <div style="padding:12px;overflow-x:auto;"><table class="orders-table" id="orders-table"><thead><tr><th>#</th><th>العميل</th><th>المبلغ</th><th>التاريخ</th><th>طباعة</th></tr></thead><tbody id="orders-list"></tbody></table></div>
+    <div style="padding:12px;overflow-x:auto;"><table class="orders-table" id="orders-table"><thead> acquisti<th>#</th><th>العميل</th><th>المبلغ</th><th>التاريخ</th><th>طباعة</th> </thead><tbody id="orders-list"></tbody> </table></div>
   </div>
 
   <div class="admin-section"><div class="admin-section-title">💱 أسعار الصرف</div>
@@ -599,7 +599,7 @@ async function removeGalleryImage(idx){
   buildSlider();
   buildGalleryPreview();
 }
-// FIXED addCategory function (works with or without image)
+// ✅ FIXED addCategory - تعمل مع أو بدون صورة وتحدث الواجهة فوراً
 async function addCategory() {
   let name = document.getElementById('new-cat-name').value.trim();
   if (!name) {
@@ -608,29 +608,26 @@ async function addCategory() {
   }
   let imageFile = document.getElementById('new-cat-image').files[0];
   
-  if (imageFile) {
-    const reader = new FileReader();
-    reader.onload = async function(e) {
-      const catImage = e.target.result;
-      MENU.push({ cat: name, image: catImage, items: [] });
-      await saveMenuToFirebase();
-      loadAdminPanel();
-      document.getElementById('new-cat-name').value = '';
-      document.getElementById('new-cat-image').value = '';
-      document.getElementById('new-cat-preview').style.display = 'none';
-      buildMenu();
-      showToast('✅ تمت إضافة الفئة مع الصورة');
-    };
-    reader.readAsDataURL(imageFile);
-  } else {
-    MENU.push({ cat: name, image: '', items: [] });
+  const addCategoryToLocalAndSync = async (imageBase64 = '') => {
+    MENU.push({ cat: name, image: imageBase64, items: [] });
     await saveMenuToFirebase();
-    loadAdminPanel();
+    // تحديث الواجهة مباشرة (بدون انتظار onSnapshot)
+    loadAdminPanel();   // تحديث لوحة الأدمن
+    buildMenu();        // تحديث شريط الفئات في المنيو
     document.getElementById('new-cat-name').value = '';
     document.getElementById('new-cat-image').value = '';
     document.getElementById('new-cat-preview').style.display = 'none';
-    buildMenu();
     showToast('✅ تمت إضافة الفئة');
+  };
+
+  if (imageFile) {
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+      await addCategoryToLocalAndSync(e.target.result);
+    };
+    reader.readAsDataURL(imageFile);
+  } else {
+    await addCategoryToLocalAndSync('');
   }
 }
 async function deleteCat(ci){
