@@ -3,10 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<!-- حل مشكلة CSP (سياسة أمان المحتوى) التي تمنع تقييم الأكواد -->
+<meta http-equiv="Content-Security-Policy" content="script-src 'unsafe-eval' 'unsafe-inline' https: 'self';">
 <title>نظام طلب المطعم - سحابي متكامل</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
+/* جميع الأنماط كما هي (نفس الكود السابق) */
 :root{--gold:#c8963e;--gold-light:#e8b86d;--bg:#0f0e0d;--bg2:#1a1814;--bg3:#1e1c18;--border:#2e2b24;--text:#f5f0e8;--muted:#a09080;--dim:#7a7060;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direction:rtl;}
@@ -177,7 +180,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direc
   </div>
 
   <div class="admin-section"><div class="admin-section-title">📋 الطلبات المسجلة</div>
-    <div style="padding:12px;overflow-x:auto;"><table class="orders-table" id="orders-table"><thead> acquisti<th>#</th><th>العميل</th><th>المبلغ</th><th>التاريخ</th><th>طباعة</th> </thead><tbody id="orders-list"></tbody> </table></div>
+    <div style="padding:12px;overflow-x:auto;"><table class="orders-table" id="orders-table"><thead> <th>#</th><th>العميل</th><th>المبلغ</th><th>التاريخ</th><th>طباعة</th> </thead><tbody id="orders-list"></tbody> </table></div>
   </div>
 
   <div class="admin-section"><div class="admin-section-title">💱 أسعار الصرف</div>
